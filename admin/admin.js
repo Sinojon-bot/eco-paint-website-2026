@@ -985,7 +985,11 @@ document.querySelectorAll(".nav").forEach(button => {
 });
 
 $("#logout").onclick = async () => {
-  if (ecoPaintAuth) await ecoPaintAuth.signOut();
+  try {
+    if (ecoPaintAuth) await ecoPaintAuth.signOut();
+  } catch (error) {
+    console.error("Sign out failed", error);
+  }
   sessionStorage.removeItem("ecoPaintAdmin");
   location.reload();
 };

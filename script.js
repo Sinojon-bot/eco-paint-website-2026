@@ -3,6 +3,11 @@ const LANGUAGE_CODES = ["tg", "ru", "en", "zh", "fa"];
 const TEXT = {
   tg: {
     search: "Ҷустуҷӯ...",
+    noResults: "Чизе ёфт нашуд.",
+    area: "Масоҳат",
+    bucketPlan: "Вариантҳои харид",
+    cheapest: "Арзонтарин",
+    addPlan: "Ба сабад илова кардан",
     all: "Ҳама",
     allProducts: "Ҳамаи маҳсулот",
     product: "маҳсулот",
@@ -87,6 +92,11 @@ const TEXT = {
   },
   ru: {
     search: "Поиск...",
+    noResults: "Ничего не найдено.",
+    area: "Площадь",
+    bucketPlan: "Варианты покупки",
+    cheapest: "Выгоднее всего",
+    addPlan: "Добавить в корзину",
     all: "Все",
     allProducts: "Все товары",
     product: "товаров",
@@ -144,6 +154,11 @@ const TEXT = {
   },
   en: {
     search: "Search...",
+    noResults: "Nothing found.",
+    area: "Area",
+    bucketPlan: "Buying options",
+    cheapest: "Best value",
+    addPlan: "Add to cart",
     all: "All",
     allProducts: "All products",
     product: "products",
@@ -201,6 +216,11 @@ const TEXT = {
   },
   zh: {
     search: "搜索...",
+    noResults: "未找到相关产品。",
+    area: "面积",
+    bucketPlan: "购买方案",
+    cheapest: "最划算",
+    addPlan: "加入购物车",
     all: "全部",
     allProducts: "所有产品",
     product: "件产品",
@@ -255,6 +275,11 @@ const TEXT = {
   },
   fa: {
     search: "جستجو...",
+    noResults: "چیزی یافت نشد.",
+    area: "مساحت",
+    bucketPlan: "گزینه‌های خرید",
+    cheapest: "به‌صرفه‌ترین",
+    addPlan: "افزودن به سبد",
     all: "همه",
     allProducts: "همه محصولات",
     product: "محصول",
@@ -601,10 +626,35 @@ function saveCart() {
 }
 
 const $ = selector => document.querySelector(selector);
-let language = localStorage.getItem("ecoPaintLanguage") || "tg";
+const savedLanguage = localStorage.getItem("ecoPaintLanguage");
+let language = LANGUAGE_CODES.includes(savedLanguage) ? savedLanguage : "tg";
 let products = loadProducts();
 let selectedCategory = "all";
 let cart = loadCart();
+
+function escapeHTML(value) {
+  return String(value ?? "").replace(/[&<>"']/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
+}
+
+function productById(id) {
+  return products.find(product => product.id === Number(id));
+}
+
+function cartVariant(product, item) {
+  return product.variants.find(variant =>
+    String(variant.weight) === String(item.weight)
+  ) || { weight: "", price: 0 };
+}
+
+// Маҳсулоте, ки админ нест кардааст, дар сабади кӯҳна намонад.
+function pruneCart() {
+  const before = cart.length;
+  cart = cart.filter(item => productById(item.id));
+  if (cart.length !== before) {
+    saveCart();
+    updateBadge();
+  }
+}
 
 function startCloudCatalog() {
   if (!ecoPaintDb || !/^https?:$/.test(location.protocol)) return;
@@ -616,6 +666,7 @@ function startCloudCatalog() {
       .map(document => upgradePlaceholderProduct(document.data()))
       .sort((a, b) => a.id - b.id);
     localStorage.setItem("ecoPaintProductsAutoV1", JSON.stringify(products));
+    pruneCart();
     renderCategories();
     renderProducts();
     renderWelcomeBuckets();
@@ -641,7 +692,11 @@ function tr(key) {
 }
 
 function localText(value) {
-  return value[language] || value.tg || "";
+  return value?.[language] || value?.tg || "";
+}
+
+function htmlText(value) {
+  return escapeHTML(localText(value));
 }
 
 const TRANSLATION_LANGUAGE = {
@@ -762,10 +817,13 @@ function getCategories() {
 
 function renderCategories() {
   const categories = getCategories();
+  if (selectedCategory !== "all" && !categories.some(([key]) => key === selectedCategory)) {
+    selectedCategory = "all";
+  }
   $("#categories").innerHTML = [
     `<button data-category="all">${tr("all")}</button>`,
     ...categories.map(([key, names]) =>
-      `<button data-category="${key}">${localText(names)}</button>`
+      `<button data-category="${escapeHTML(key)}">${htmlText(names)}</button>`
     )
   ].join("");
 
@@ -781,7 +839,7 @@ function renderCategories() {
 }
 
 function renderProducts() {
-  const query = $("#search").value.toLowerCase();
+  const query = $("#search").value.trim().toLowerCase();
   const list = products.filter(product => {
     const correctCategory = selectedCategory === "all" ||
       product.category.tg === selectedCategory;
@@ -797,7 +855,7 @@ function renderProducts() {
   const currentCategory = getCategories().find(
     ([key]) => key === selectedCategory
   );
-  $("#title").textContent = selectedCategory === "all"
+  $("#title").textContent = selectedCategory === "all" || !currentCategory
     ? tr("allProducts")
     : localText(currentCategory[1]);
   $("#productCount").textContent = `${list.length} ${tr("product")}`;
@@ -811,15 +869,15 @@ function renderProducts() {
     const first = variants[0];
 
     return `
-      <article class="card" data-id="${product.id}" data-weight="${first.weight}"
-        style="--paint-accent:${paintAccents[(Number(product.id) - 1) % paintAccents.length]};--card-delay:${cardIndex * 70}ms">
+      <article class="card" data-id="${product.id}" data-weight="${escapeHTML(first.weight)}"
+        style="--paint-accent:${paintAccents[Math.abs(Number(product.id) - 1) % paintAccents.length]};--card-delay:${cardIndex * 70}ms">
         ${product.discount ? `<span class="discount-badge">-${product.discount}%</span>` : ""}
         <button class="photo details-button" data-details="${product.id}">
-          <img src="${product.image}" alt="${localText(product.name)}">
+          <img src="${escapeHTML(product.image)}" alt="${htmlText(product.name)}" loading="lazy">
           <span>${tr("buy")}</span>
         </button>
         <div class="paint-motion" aria-hidden="true">
-          <img class="paint-real-lid" src="${product.image}" alt="">
+          <img class="paint-real-lid" src="${escapeHTML(product.image)}" alt="" loading="lazy">
           <i class="paint-wave"></i>
           <i class="paint-drop drop-one"></i>
           <i class="paint-drop drop-two"></i>
@@ -829,22 +887,22 @@ function renderProducts() {
         </div>
         <div class="product-hover-info">
           <small>${tr("hoverInfo")}</small>
-          <strong>${localText(product.name)}</strong>
-          <p>${localText(product.description)}</p>
+          <strong>${htmlText(product.name)}</strong>
+          <p>${htmlText(product.description)}</p>
           <div>
             ${variants.map(variant => `
-              <span>${sizeLabel(variant)} — ${priceLabel(product, variant)}</span>
+              <span>${escapeHTML(sizeLabel(variant))} — ${priceLabel(product, variant)}</span>
             `).join("")}
           </div>
         </div>
-        <small>${localText(product.category)}</small>
-        <h3>${localText(product.name)}</h3>
+        <small>${htmlText(product.category)}</small>
+        <h3>${htmlText(product.name)}</h3>
         <div class="sizes">
           ${variants.map((variant, index) => `
             <button
               class="${index ? "" : "selected"}"
-              data-weight="${variant.weight}">
-              ${sizeLabel(variant)}
+              data-weight="${escapeHTML(variant.weight)}">
+              ${escapeHTML(sizeLabel(variant))}
             </button>
           `).join("")}
         </div>
@@ -854,11 +912,11 @@ function renderProducts() {
             ${product.discount && first.price ? `<span class="old-price">${first.price} ${tr("currency")}</span>` : ""}
             <b class="price">${priceLabel(product, first)}</b>
           </div>
-          <button class="add">+</button>
+          <button class="add" aria-label="${tr("cart")}">+</button>
         </div>
       </article>
     `;
-  }).join("");
+  }).join("") || `<p class="empty-results">${tr("noResults")}</p>`;
 
   document.querySelectorAll(".card").forEach(card => {
     const product = products.find(
@@ -904,8 +962,8 @@ function renderWelcomeBuckets() {
   const accents = ["#13a653", "#347ff0", "#ff7a3d", "#f3c431"];
   holder.innerHTML = products.slice(0, 4).map((product, index) => `
     <div class="welcome-bucket" style="--welcome-paint:${accents[index]};--welcome-delay:${1 + index * .24}s">
-      <img src="${product.image}" alt="">
-      <img class="welcome-real-lid" src="${product.image}" alt="">
+      <img src="${escapeHTML(product.image)}" alt="">
+      <img class="welcome-real-lid" src="${escapeHTML(product.image)}" alt="">
       <i class="welcome-pool"></i>
       <i class="welcome-drop d1"></i>
       <i class="welcome-drop d2"></i>
@@ -915,20 +973,21 @@ function renderWelcomeBuckets() {
 }
 
 function showProductDetails(id) {
-  const product = products.find(item => item.id === id);
+  const product = productById(id);
+  if (!product) return;
   const variants = product.variants.length
     ? product.variants
     : [{ weight: "", price: 0 }];
   openSheet(`
-    <img class="product-detail-image" src="${product.image}">
-    <small>${localText(product.category)}</small>
-    <h2>${localText(product.name)}</h2>
-    <p>${localText(product.description)}</p>
+    <img class="product-detail-image" src="${escapeHTML(product.image)}" alt="${htmlText(product.name)}">
+    <small>${htmlText(product.category)}</small>
+    <h2>${htmlText(product.name)}</h2>
+    <p>${htmlText(product.description)}</p>
     ${product.discount ? `<p class="discount-admin">${tr("discount")}: ${product.discount}%</p>` : ""}
     <div class="sizes">
       ${variants.map(variant => `
-        <button onclick="addDetailToCart(${product.id}, '${variant.weight}')">
-          ${sizeLabel(variant)} · ${priceLabel(product, variant)}
+        <button onclick="addDetailToCart(${product.id}, '${escapeHTML(variant.weight)}')">
+          ${escapeHTML(sizeLabel(variant))} · ${priceLabel(product, variant)}
         </button>
       `).join("")}
     </div>
@@ -940,9 +999,10 @@ window.addDetailToCart = (id, weight) => {
   addToCart(product, weight);
 };
 
-function addToCart(product, weight) {
+function addToCart(product, weight, quantity = 1) {
+  if (!product) return;
   if (!isRegistered()) {
-    pendingAuthAction = () => addToCart(product, weight);
+    pendingAuthAction = () => addToCart(product, weight, quantity);
     showAuth();
     return;
   }
@@ -951,8 +1011,8 @@ function addToCart(product, weight) {
     String(entry.weight) === String(weight)
   );
   item
-    ? item.quantity++
-    : cart.push({ id: product.id, weight, quantity: 1 });
+    ? item.quantity += quantity
+    : cart.push({ id: product.id, weight, quantity });
   saveCart();
   updateBadge();
   showCart();
@@ -966,7 +1026,7 @@ function updateBadge() {
 }
 
 function openSheet(html) {
-  $(".sheet").classList.remove("studio-sheet");
+  $(".sheet").classList.remove("studio-sheet", "photo-variant-sheet");
   $("#sheetContent").innerHTML = html;
   $("#overlay").classList.remove("hidden");
 }
@@ -977,17 +1037,16 @@ function showCart() {
     showAuth();
     return;
   }
+  pruneCart();
   const lines = cart.map((item, index) => {
-    const product = products.find(p => p.id === item.id);
-    const variant = product.variants.find(v =>
-      String(v.weight) === String(item.weight)
-    ) || { weight: "", price: 0 };
+    const product = productById(item.id);
+    const variant = cartVariant(product, item);
     return `
       <div class="cartLine">
-        <img src="${product.image}">
+        <img src="${escapeHTML(product.image)}" alt="">
         <div>
-          <b>${localText(product.name)}</b>
-          <small>${sizeLabel(variant)} · ${priceLabel(product, variant)}</small>
+          <b>${htmlText(product.name)}</b>
+          <small>${escapeHTML(sizeLabel(variant))} · ${priceLabel(product, variant)}</small>
           <div class="qty">
             <button onclick="changeQuantity(${index}, -1)">−</button>
             <span>${item.quantity}</span>
@@ -1002,11 +1061,13 @@ function showCart() {
   openSheet(`
     <h2>${tr("cartTitle")}</h2>
     ${cart.length ? lines : `<p>🛒 ${tr("emptyCart")}</p>`}
+    ${cart.length ? `<div class="cart-total"><span>${tr("total")}</span><b>${orderTotal()} ${tr("currency")}</b></div>` : ""}
     ${cart.length ? `<button class="action" onclick="showOrder()">${tr("continue")}</button>` : ""}
   `);
 }
 
 window.changeQuantity = (index, change) => {
+  if (!cart[index]) return;
   cart[index].quantity = Math.max(
     1,
     cart[index].quantity + change
@@ -1053,11 +1114,9 @@ function paymentSettings() {
 
 function orderTotal() {
   return Math.round(cart.reduce((sum, item) => {
-    const product = products.find(entry => entry.id === item.id);
-    const variant = product.variants.find(entry =>
-      String(entry.weight) === String(item.weight)
-    ) || { price: 0 };
-    return sum + finalPrice(product, variant) * item.quantity;
+    const product = productById(item.id);
+    if (!product) return sum;
+    return sum + finalPrice(product, cartVariant(product, item)) * item.quantity;
   }, 0) * 100) / 100;
 }
 
@@ -1205,12 +1264,17 @@ window.showOrder = () => {
   } catch (error) {
     console.error(error);
   }
+  pruneCart();
+  if (!cart.length) {
+    showCart();
+    return;
+  }
   openSheet(`
     <h2>${tr("orderTitle")}</h2>
     <form class="order" id="order">
-      <label>${tr("fullName")}<input name="name" value="${profile.name || ""}" required></label>
-      <label>${tr("phone")}<input name="phone" type="tel" value="${profile.phone || ""}" required></label>
-      <label>${tr("city")}<input name="city" value="${profile.city || ""}" required></label>
+      <label>${tr("fullName")}<input name="name" value="${escapeHTML(profile.name)}" autocomplete="name" required></label>
+      <label>${tr("phone")}<input name="phone" type="tel" value="${escapeHTML(profile.phone)}" autocomplete="tel" required></label>
+      <label>${tr("city")}<input name="city" value="${escapeHTML(profile.city)}" autocomplete="address-level2" required></label>
       <label>${tr("address")}<textarea name="address" required></textarea></label>
       <div>
         <b>${tr("paymentMethod")}</b>
@@ -1327,11 +1391,9 @@ $("#sheetContent").addEventListener("submit", event => {
     alert(tr("receipt"));
     return;
   }
-  const productLines = cart.map(item => {
-    const product = products.find(p => p.id === item.id);
-    const variant = product.variants.find(v =>
-      String(v.weight) === String(item.weight)
-    ) || { weight: "", price: 0 };
+  const productLines = cart.filter(item => productById(item.id)).map(item => {
+    const product = productById(item.id);
+    const variant = cartVariant(product, item);
     return `• ${localText(product.name)} — ` +
       `${sizeLabel(variant)} × ${item.quantity} ` +
       `(${priceLabel(product, variant)})`;
@@ -1356,11 +1418,12 @@ $("#sheetContent").addEventListener("submit", event => {
     `${tr("comment")}: ${form.get("comment") || "—"}`
   ].join("\n");
 
-  window.open(
-    `https://wa.me/${settings.whatsapp}?text=` +
-      encodeURIComponent(message),
-    "_blank"
-  );
+  const whatsappUrl = `https://wa.me/${String(settings.whatsapp).replace(/\D/g, "")}?text=` +
+    encodeURIComponent(message);
+  // Агар браузер равзанаи навро манъ кунад, фармоиш набояд гум шавад.
+  if (!window.open(whatsappUrl, "_blank")) {
+    location.href = whatsappUrl;
+  }
   rememberCustomerOrder(phone);
   cart = [];
   saveCart();
@@ -1368,9 +1431,52 @@ $("#sheetContent").addEventListener("submit", event => {
   $("#overlay").classList.add("hidden");
 });
 
+// Арзонтарин омехтаи сатилҳо, ки ҳадди ақал `kilograms` кг медиҳад.
+function cheapestBucketPlan(product, kilograms) {
+  const sizes = product.variants
+    .map(variant => ({
+      variant,
+      units: Math.round(Number(variant.weight) * 10),
+      price: finalPrice(product, variant)
+    }))
+    .filter(size => size.units > 0 && size.price > 0);
+  if (!sizes.length) return null;
+
+  const target = Math.round(kilograms * 10);
+  const limit = target + Math.max(...sizes.map(size => size.units));
+  const cost = new Array(limit + 1).fill(Infinity);
+  const choice = new Array(limit + 1).fill(-1);
+  cost[0] = 0;
+  for (let amount = 1; amount <= limit; amount++) {
+    sizes.forEach((size, index) => {
+      if (size.units <= amount && cost[amount - size.units] + size.price < cost[amount]) {
+        cost[amount] = cost[amount - size.units] + size.price;
+        choice[amount] = index;
+      }
+    });
+  }
+
+  let best = -1;
+  for (let amount = target; amount <= limit; amount++) {
+    if (cost[amount] < Infinity && (best < 0 || cost[amount] < cost[best])) best = amount;
+  }
+  if (best < 0) return null;
+
+  const counts = new Map();
+  for (let amount = best; amount > 0; amount -= sizes[choice[amount]].units) {
+    const size = sizes[choice[amount]];
+    counts.set(size, (counts.get(size) || 0) + 1);
+  }
+  return {
+    total: Math.round(cost[best] * 100) / 100,
+    items: [...counts].map(([size, count]) => ({ variant: size.variant, count }))
+  };
+}
+
 function showCalculator() {
+  if (!products.length) return;
   const options = products.map(product => `
-    <option value="${product.id}">${localText(product.name)}</option>
+    <option value="${product.id}">${htmlText(product.name)}</option>
   `).join("");
   openSheet(`
     <h2>${tr("calculator")}</h2>
@@ -1390,19 +1496,50 @@ function showCalculator() {
 
   $("#paintCalculator").onsubmit = event => {
     event.preventDefault();
-    const product = products.find(item =>
-      item.id === Number($("#calculatorProduct").value)
-    );
-    const area = Number($("#wallWidth").value) *
-      Number($("#wallHeight").value);
+    const product = productById($("#calculatorProduct").value);
+    if (!product) return;
+    const area = Math.round(Number($("#wallWidth").value) *
+      Number($("#wallHeight").value) * 100) / 100;
     const kilograms = Math.ceil(
       area * Number($("#coatCount").value) / product.coverage
     );
+    const plan = cheapestBucketPlan(product, kilograms);
     $("#calculatorResult").innerHTML = `
       <div class="paint-result">
-        ${tr("needed")}: ${kilograms} ${tr("kg")}
+        <span>${tr("area")}: ${area} м²</span>
+        <b>${tr("needed")}: ${kilograms} ${tr("kg")}</b>
       </div>
+      ${plan ? `
+        <div class="bucket-plan">
+          <small>${tr("bucketPlan")} · ${tr("cheapest")}</small>
+          ${plan.items.map(item => `
+            <span>${escapeHTML(sizeLabel(item.variant))} × ${item.count}</span>
+          `).join("")}
+          <b>${tr("total")}: ${plan.total} ${tr("currency")}</b>
+          <button id="addBucketPlan" class="action" type="button">${tr("addPlan")}</button>
+        </div>
+      ` : ""}
     `;
+    if (plan) {
+      $("#addBucketPlan").onclick = function addPlan() {
+        if (!isRegistered()) {
+          pendingAuthAction = addPlan;
+          showAuth();
+          return;
+        }
+        plan.items.forEach(item => {
+          const existing = cart.find(entry =>
+            entry.id === product.id && String(entry.weight) === String(item.variant.weight)
+          );
+          existing
+            ? existing.quantity += item.count
+            : cart.push({ id: product.id, weight: item.variant.weight, quantity: item.count });
+        });
+        saveCart();
+        updateBadge();
+        showCart();
+      };
+    }
   };
 }
 
@@ -1461,11 +1598,11 @@ function showWallStudioLegacy(selectedId = products[0]?.id) {
     <div class="studio-toolbar">
       <div><b>${tr("visualizer")}</b><small>${tr("dragWall")}</small></div>
       <select id="wallProduct" aria-label="${tr("chooseWallProduct")}">
-        ${products.map(item => `<option value="${item.id}" ${item.id === product.id ? "selected" : ""}>${localText(item.name)}</option>`).join("")}
+        ${products.map(item => `<option value="${item.id}" ${item.id === product.id ? "selected" : ""}>${htmlText(item.name)}</option>`).join("")}
       </select>
     </div>
     <div id="studioStage" class="studio-stage ${mode}-scene finish-${mode}">
-      <img src="${image}" alt="${localText(product.name)}">
+      <img src="${image}" alt="${htmlText(product.name)}">
       ${isDemo ? "" : `
         <div id="paintSurface" class="studio-paint-surface">
           <div id="wallBands" class="studio-bands"></div>
@@ -1565,10 +1702,10 @@ function showWallStudio(selectedId = products[0]?.id) {
     <div class="studio-toolbar">
       <div><b>${tr("visualizer")}</b><small>${labels.color}</small></div>
       <select id="wallProduct" aria-label="${tr("chooseWallProduct")}">
-        ${products.map(item => `<option value="${item.id}" ${item.id === product.id ? "selected" : ""}>${localText(item.name)}</option>`).join("")}
+        ${products.map(item => `<option value="${item.id}" ${item.id === product.id ? "selected" : ""}>${htmlText(item.name)}</option>`).join("")}
       </select>
     </div>
-    <div class="photo-variant-stage"><img id="variantScene" alt="${localText(product.name)}"></div>
+    <div class="photo-variant-stage"><img id="variantScene" alt="${htmlText(product.name)}"></div>
     ${roomKeys.length > 1 ? `<div class="photo-room-tabs" aria-label="${labels.room}">${roomKeys.map(key => `<button type="button" data-room="${key}">${labels[key]}</button>`).join("")}</div>` : ""}
     <div class="photo-variant-heading"><b>${labels.color}</b><span id="variantCount"></span></div>
     <div id="photoVariantPalette" class="photo-variant-palette"></div>
@@ -1594,6 +1731,7 @@ function applyLanguage() {
   document.documentElement.dir = language === "fa" ? "rtl" : "ltr";
   localStorage.setItem("ecoPaintLanguage", language);
   $("#search").placeholder = tr("search");
+  $("#search").setAttribute("aria-label", tr("search"));
   $("#homeLabel").textContent = tr("home");
   $("#catalogLabel").textContent = tr("catalog");
   $("#cartLabel").textContent = tr("cart");
@@ -1658,7 +1796,7 @@ const AUTH_TEXT = {
   ru: ["Регистрация", "Сохраните данные один раз для покупок", "Войти через Google", "Google передаст только имя, email и фото профиля.", "или", "Имя и фамилия", "Номер телефона", "Город или район", "Зарегистрироваться"],
   en: ["Sign up", "Save your details once for faster checkout", "Continue with Google", "Google only shares your name, email and profile photo.", "or", "Full name", "Phone number", "City or district", "Sign up"],
   zh: ["注册", "保存一次信息即可快速购物", "使用 Google 登录", "Google 只会分享姓名、邮箱和头像。", "或", "姓名", "电话号码", "城市或地区", "注册"],
-  fa: ["ثبت‌نام", "اطلاعات را یک‌بار برای خرید ذخیره کنید", "ورود با Google", "Google فقط نام، ایمیل و تصویر پروفایل را می‌فرستد。", "یا", "نام و نام خانوادگی", "شماره تلفن", "شهر یا منطقه", "ثبت‌نام"]
+  fa: ["ثبت‌نام", "اطلاعات را یک‌بار برای خرید ذخیره کنید", "ورود با Google", "Google فقط نام، ایمیل و تصویر پروفایل را می‌فرستد.", "یا", "نام و نام خانوادگی", "شماره تلفن", "شهر یا منطقه", "ثبت‌نام"]
 };
 
 function savedCustomerProfile() {
@@ -1758,9 +1896,10 @@ async function loadSignedInUser() {
 
 function showProfileAvatar(avatar) {
   const container = $("#profileAvatar");
+  avatar = String(avatar || "👤");
   container.innerHTML = avatar.startsWith("data:image/") || avatar.startsWith("https://")
-    ? `<img src="${avatar}" alt="">`
-    : avatar;
+    ? `<img src="${escapeHTML(avatar)}" alt="" referrerpolicy="no-referrer">`
+    : escapeHTML(avatar);
 }
 
 function renderProfile(profile) {
@@ -1881,6 +2020,11 @@ $("#overlay").onclick = event => {
     event.target.classList.add("hidden");
   }
 };
+document.addEventListener("keydown", event => {
+  if (event.key !== "Escape") return;
+  $("#overlay").classList.add("hidden");
+  $("#authOverlay").classList.add("hidden");
+});
 
 function showPage(page) {
   $("#welcomePage").classList.toggle("hidden", page !== "home");
@@ -1889,6 +2033,7 @@ function showPage(page) {
   $("#homeBtn").classList.toggle("active", page === "home");
   $("#catalogBtn").classList.toggle("active", page === "catalog");
   $("#contactBtn").classList.toggle("active", page === "contact");
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 $("#homeBtn").onclick = () => showPage("home");
@@ -1917,6 +2062,12 @@ $("#quickRegister").onsubmit = async event => {
     email: signedInUser?.email || old.email || "",
     avatar: signedInUser?.picture || old.avatar || "👤"
   };
+  if (profile.phone.replace(/\D/g, "").length < 9) {
+    $("#authError").textContent = "Рақами телефонро пурра нависед (масалан, 992 55 490 06 00).";
+    $("#authError").classList.remove("hidden");
+    $("#authPhone").focus();
+    return;
+  }
   localStorage.setItem("ecoPaintCustomerProfile", JSON.stringify(profile));
   try {
     await saveCustomerToFirebase(profile);
@@ -1935,6 +2086,7 @@ $("#quickRegister").onsubmit = async event => {
 window.addEventListener("storage", event => {
   if (event.key === "ecoPaintProductsAutoV1") {
     products = loadProducts();
+    pruneCart();
     renderCategories();
     renderProducts();
     renderWelcomeBuckets();
@@ -1944,6 +2096,7 @@ window.addEventListener("storage", event => {
 async function startSite() {
   applyLanguage();
   renderWelcomeBuckets();
+  pruneCart();
   updateBadge();
   loadProfile();
   startCloudCatalog();
