@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="tg">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Eco Paint — Админ</title>
+  <link rel="stylesheet" href="admin.css">
+  <link rel="stylesheet" href="admin-language.css">
+</head>
+<body>
+  <section id="loginView" class="login-view">
+    <form id="loginForm" class="login-card">
+      <div class="brand">Eco<b>paint</b></div>
+      <h1>Воридшавии админ</h1>
+      <label>Номи корбар<input id="username" required></label>
+      <label>Рамз<input id="password" type="password" required></label>
+      <p id="loginError" class="error"></p>
+      <button class="primary">Ворид шудан</button>
+      <button id="loginGoogle" class="secondary" type="button">Ворид шудан бо Google-и админ</button>
+      <p id="loginHelp" class="login-help">Барои тағйир додани сайти интернетӣ ва дидани харидорон бо Google-и админ ворид шавед.</p>
+      <a class="online-admin" href="https://eco-paint-tajikistan.nazarovbahodur11.chatgpt.site/admin/">Кушодани админ дар интернет ↗</a>
+    </form>
+  </section>
+
+  <div id="adminView" class="admin-view hidden">
+    <aside>
+      <div class="brand">Eco<b>paint</b><small>Админ</small></div>
+      <button class="nav active" data-view="productsView">
+        ▦ Маҳсулотҳо
+      </button>
+      <button class="nav" data-view="formView">
+        ＋ Иловаи маҳсулот
+      </button>
+      <button class="nav" data-view="paymentView">
+        💳 Пардохт
+      </button>
+      <button class="nav" data-view="customersView">
+        👥 Харидорон
+      </button>
+      <a href="../index.html">↗ Дидани сайт</a>
+      <button id="logout" class="logout">Баромадан</button>
+    </aside>
+
+    <main>
+      <section class="cloud-connection" aria-label="Пайвастшавӣ">
+        <p id="cloudStatus" role="status" aria-live="polite">Барои нигоҳ доштани тағйирот бо Google-и админ ворид шавед.</p>
+        <div><button id="connectAdmin" class="primary" type="button">Пайваст шудан бо Google</button>
+        <button id="refreshAdmin" class="secondary" type="button">Нав кардани маълумот</button></div>
+      </section>
+      <section id="productsView" class="view">
+        <div class="topline">
+          <div>
+            <h1>Маҳсулотҳо</h1>
+            <p>Барои тағйир додан маҳсулотро интихоб кунед.</p>
+          </div>
+          <button id="newProduct" class="primary">
+            ＋ Маҳсулоти нав
+          </button>
+        </div>
+        <input
+          id="adminSearch"
+          class="search-input"
+          placeholder="Ҷустуҷӯи маҳсулот..."
+        >
+        <div id="productList" class="product-list"></div>
+      </section>
+
+      <section id="formView" class="view hidden">
+        <div class="topline">
+          <div>
+            <h1 id="formTitle">Иловаи маҳсулот</h1>
+            <p>Матн, сурат, нарх, вазн, ранг ва масрафро тағйир диҳед. Тарҷумаҳои мавҷуда ҳангоми тағйири нарх нигоҳ дошта мешаванд.</p>
+          </div>
+          <button id="cancelEdit" class="secondary">
+            Бекор кардан
+          </button>
+        </div>
+
+        <form id="productForm" class="editor">
+          <input id="productId" type="hidden">
+          <div class="image-box">
+            <img id="imagePreview" alt="Пешнамоиши сурат">
+            <label class="file-button">
+              Интихоби сурат
+              <input id="imageFile" type="file" accept="image/*">
+            </label>
+            <input id="imageValue" type="hidden">
+          </div>
+
+          <div class="fields">
+            <div id="translationFields"></div>
+
+            <label class="discount-field">
+              Тахфиф (фоиз)
+              <input
+                id="discount"
+                type="number"
+                min="0"
+                max="90"
+                value="0"
+              >
+            </label>
+
+            <label>
+              Масраф (м² аз 1 кг)
+              <input
+                id="coverage"
+                type="number"
+                min="1"
+                step="0.1"
+                value="7"
+              >
+            </label>
+
+            <label>
+              Рангҳои дастрас (бо вергул)
+              <input
+                id="colors"
+                placeholder="#ffffff, #d8c8a8, #88aacc"
+              >
+            </label>
+
+            <div class="price-head">
+              <h2>Вазн ва нарх</h2>
+              <button id="addPrice" type="button" class="secondary">
+                ＋ Вазн
+              </button>
+            </div>
+            <div id="priceRows"></div>
+            <button id="saveProduct" class="primary save">
+              Нигоҳ доштан дар сайт
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <section id="paymentView" class="view hidden">
+        <div class="topline">
+          <div>
+            <h1>Танзими пардохт</h1>
+            <p>Маълумоти корт ва пешпардохти фармоиши якум.</p>
+          </div>
+        </div>
+        <form id="paymentForm" class="payment-settings fields">
+          <label>
+            Рақами корт
+            <input id="merchantCard" inputmode="numeric" value="001022011" required>
+          </label>
+          <label>
+            Номи соҳиби корт
+            <input id="merchantName" placeholder="Агар лозим бошад, ному насабро нависед">
+          </label>
+          <label>
+            Рақами WhatsApp
+            <input id="merchantWhatsApp" inputmode="tel" placeholder="992XXXXXXXXX" required>
+          </label>
+          <label>
+            Пешпардохти фармоиши якум (%)
+            <input id="firstOrderDeposit" type="number" min="1" max="100" value="15" required>
+          </label>
+          <label class="check-setting">
+            <input id="receiptCheckEnabled" type="checkbox" checked>
+            Санҷиши автоматии чек фаъол бошад
+          </label>
+          <label>
+            Калимаҳои шинохти Dushanbe City (бо вергул)
+            <textarea id="receiptBrandWords" rows="3">dushanbe, душанбе, dc next, dc wallet, 001022011</textarea>
+          </label>
+          <label>
+            Калимаҳои пардохти муваффақ (бо вергул)
+            <textarea id="receiptSuccessWords" rows="3">успеш, оплачен, выполнен, success, successful, мувафф</textarea>
+          </label>
+          <button class="primary save">Нигоҳ доштани пардохт</button>
+        </form>
+      </section>
+
+      <section id="customersView" class="view hidden">
+        <div class="topline">
+          <div>
+            <h1>Харидорон</h1>
+            <p>Одамоне, ки бо Google бақайдгирӣ кардаанд.</p>
+          </div>
+          <button id="adminGoogleLogin" class="primary" type="button">Ворид шудан бо Google</button>
+        </div>
+        <p id="customerStatus" class="customer-status">Барои дидани рӯйхат бо аккаунти админ ворид шавед.</p>
+        <div id="customerList" class="customer-list"></div>
+      </section>
+    </main>
+  </div>
+
+  <div id="toast" class="toast"></div>
+  <script src="https://cdn.jsdelivr.net/npm/firebase@10.14.1/firebase-app-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/firebase@10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/firebase@10.14.1/firebase-firestore-compat.js"></script>
+  <script src="../firebase-config.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>

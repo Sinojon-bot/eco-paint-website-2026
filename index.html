@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="tg">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Eco Paint Тоҷикистон</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="language.css">
+  <link rel="stylesheet" href="features.css">
+</head>
+<body>
+  <main class="app">
+    <header>
+      <div class="logo">Eco<b>paint</b></div>
+      <label class="search">
+        ⌕
+        <input id="search">
+      </label>
+      <div class="language-picker" aria-label="Интихоби забон">
+        <button data-lang="tg" title="Тоҷикӣ">
+          <img src="flags/tj.svg" alt="Тоҷикӣ">
+        </button>
+        <button data-lang="zh" title="中文">
+          <img src="flags/cn.svg" alt="中文">
+        </button>
+        <button data-lang="ru" title="Русский">
+          <img src="flags/ru.svg" alt="Русский">
+        </button>
+        <button data-lang="en" title="English">
+          <img src="flags/gb.svg" alt="English">
+        </button>
+        <button data-lang="fa" title="فارسی">
+          <img src="flags/ir.svg" alt="فارسی">
+        </button>
+      </div>
+      <button id="openCart" class="cartBtn">
+        🛒<b id="badge">0</b>
+      </button>
+    </header>
+
+    <section id="welcomePage" class="welcome-page">
+      <div class="welcome-copy" aria-label="Хуш омадед ба Eco Paint">
+        <span>Хуш</span><span>омадед</span><span>ба</span><strong>Eco Paint</strong>
+      </div>
+      <div id="welcomeBuckets" class="welcome-buckets" aria-hidden="true"></div>
+      <button id="welcomeCatalogBtn" class="welcome-catalog" type="button">Маҳсулотҳоро бинед <b>→</b></button>
+    </section>
+
+    <section id="catalogPage" class="catalog-page hidden">
+      <nav id="categories" class="chips"></nav>
+      <div class="feature-bar">
+        <button id="calculatorBtn"><b>⌗</b><span id="calculatorLabel"></span><i>→</i></button>
+        <button id="visualizerBtn"><b>◉</b><span id="visualizerLabel"></span><i>→</i></button>
+      </div>
+      <div class="heading">
+        <h1 id="title"></h1>
+        <span id="productCount"></span>
+      </div>
+      <section id="products" class="grid"></section>
+    </section>
+
+    <section id="contact" class="contact profile-page hidden">
+      <h1 id="contactTitle"></h1>
+      <div class="profile-card">
+        <div id="profileAvatar" class="profile-avatar">👤</div>
+        <section id="profileView" class="profile-view">
+          <h2 id="profileDisplayName">Меҳмон</h2>
+          <p id="profileDisplayCity"></p>
+          <p id="profileDisplayPhone"></p>
+          <button id="editProfile" class="secondary-action" type="button"></button>
+          <button id="profileLogout" class="profile-logout" type="button">Баромадан</button>
+          <a
+            id="profileWhatsApp"
+            class="whatsapp-action"
+            href="https://wa.me/992554900600"
+            target="_blank"
+            rel="noopener"
+          >WhatsApp</a>
+        </section>
+        <form id="profileForm" class="profile-editor hidden">
+          <div>
+            <span id="chooseAvatarLabel" class="field-title"></span>
+            <div class="avatar-options">
+              <button type="button" data-avatar="👤">👤</button>
+              <button type="button" data-avatar="🧑">🧑</button>
+              <button type="button" data-avatar="👨">👨</button>
+              <button type="button" data-avatar="👩">👩</button>
+              <button type="button" data-avatar="👨‍🔧">👨‍🔧</button>
+              <button type="button" data-avatar="👷">👷</button>
+            </div>
+            <label class="gallery-button">
+              <span id="galleryLabel"></span>
+              <input id="profileImage" type="file" accept="image/*">
+            </label>
+          </div>
+        <label>
+          <span id="profileNameLabel"></span>
+          <input id="profileName" autocomplete="name">
+        </label>
+        <label>
+          <span id="profilePhoneLabel"></span>
+          <input id="profilePhone" type="tel" autocomplete="tel">
+        </label>
+        <label>
+          <span id="profileCityLabel"></span>
+          <input id="profileCity" autocomplete="address-level2">
+        </label>
+        <button id="saveProfile" class="action"></button>
+        <button id="cancelProfile" class="secondary-action" type="button"></button>
+        </form>
+        <p id="profileMessage" class="profile-message"></p>
+      </div>
+    </section>
+
+    <nav class="bottom">
+      <button id="homeBtn" class="active">
+        ⌂<span id="homeLabel"></span>
+      </button>
+      <button id="catalogBtn">
+        ▦<span id="catalogLabel"></span>
+      </button>
+      <button id="cartNav">
+        🛒<span id="cartLabel"></span>
+      </button>
+      <button id="contactBtn">
+        👤<span id="contactLabel"></span>
+      </button>
+    </nav>
+  </main>
+
+  <div id="overlay" class="overlay hidden">
+    <section class="sheet">
+      <i></i>
+      <button id="close" class="close">×</button>
+      <div id="sheetContent"></div>
+    </section>
+  </div>
+
+  <div id="authOverlay" class="auth-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+    <section class="auth-dialog">
+      <button id="closeAuth" class="auth-close" type="button" aria-label="Close">×</button>
+      <div class="auth-brand"><span class="auth-mark">E</span><strong>Eco <b>paint</b></strong></div>
+      <h2 id="authTitle">Бақайдгирӣ</h2>
+      <p id="authDescription">Барои харид маълумотро як бор нигоҳ доред</p>
+      <button id="googleLogin" class="google-login" type="button" aria-label="Ворид шудан бо Google">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M21.6 12.23c0-.71-.06-1.4-.18-2.07H12v3.92h5.38a4.6 4.6 0 0 1-2 3.02v2.54h3.24c1.9-1.75 2.98-4.33 2.98-7.41Z"/><path fill="#34A853" d="M12 22c2.7 0 4.97-.9 6.62-2.36l-3.24-2.54c-.9.6-2.05.96-3.38.96-2.61 0-4.82-1.76-5.61-4.13H3.04v2.62A10 10 0 0 0 12 22Z"/><path fill="#FBBC05" d="M6.39 13.93A6.02 6.02 0 0 1 6.08 12c0-.67.11-1.32.31-1.93V7.45H3.04A10 10 0 0 0 2 12c0 1.61.39 3.14 1.04 4.55l3.35-2.62Z"/><path fill="#EA4335" d="M12 5.94c1.47 0 2.79.5 3.82 1.5l2.87-2.87A9.63 9.63 0 0 0 12 2a10 10 0 0 0-8.96 5.45l3.35 2.62C7.18 7.7 9.39 5.94 12 5.94Z"/></svg>
+        <span id="googleLoginLabel">Ворид шудан бо Google</span>
+      </button>
+      <div class="auth-divider"><span id="authOr">ё</span></div>
+      <form id="quickRegister" class="quick-register">
+        <label><span id="authNameLabel">Ному насаб</span><input id="authName" autocomplete="name" required></label>
+        <label><span id="authPhoneLabel">Рақами телефон</span><input id="authPhone" type="tel" autocomplete="tel" inputmode="tel" required></label>
+        <label><span id="authCityLabel">Шаҳр ё ноҳия</span><input id="authCity" autocomplete="address-level2" required></label>
+        <button id="authSubmit" type="submit">Бақайдгирӣ</button>
+      </form>
+      <p id="authError" class="auth-error hidden"></p>
+      <small id="authPrivacy">Google танҳо ном, email ва расми профили шуморо мефиристад.</small>
+    </section>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/firebase@10.14.1/firebase-app-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/firebase@10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/firebase@10.14.1/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <script src="wall-variants-data.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,48 @@
+.translation-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  grid-column: 1 / -1;
+  margin-bottom: 10px;
+}
+
+.translation-tabs button {
+  padding: 9px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: white;
+}
+
+.translation-tabs button.active {
+  color: white;
+  background: var(--green);
+}
+
+#translationFields {
+  grid-column: 1 / -1;
+}
+
+.discount-field {
+  grid-column: 1 / -1;
+  max-width: 260px;
+}
+
+.language-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 15px;
+}
+
+.language-fields label:last-child {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 650px) {
+  .language-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .language-fields label:last-child {
+    grid-column: auto;
+  }
+}
