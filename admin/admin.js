@@ -408,11 +408,11 @@ async function seedOrLoadCloudProducts() {
   }
   renderProducts();
   if (cloudCatalogNeedsSeed) {
-    setCloudStatus("Пайваст шуд. Маҳсулотҳои ҳозираи сайт ҳанӯз пешфарзанд; сабти аввал онҳоро ба сервер мегузаронад.");
+    setCloudStatus("Пайваст шуд. Сабти аввали маҳсулот онҳоро ба сайти интернетӣ мегузаронад.");
   } else if (upgradedCloudCatalog) {
-    setCloudStatus(`Каталоги MVP нав шуд · ${products.length} маҳсулот ба сервер навишта шуд.`);
+    setCloudStatus(`Каталог нав шуд · ${products.length} маҳсулот дар интернет. Сурат/нархро тағйир диҳед ва нигоҳ доред.`);
   } else {
-    setCloudStatus(`Пайваст: ${ecoPaintAuth.currentUser.email} · ${products.length} маҳсулот аз сервер.`);
+    setCloudStatus(`Пайваст: ${ecoPaintAuth.currentUser.email} · ${products.length} маҳсулот. Тағйирот баъд аз «Нигоҳ доштан» дар сайт дида мешавад.`);
   }
 }
 

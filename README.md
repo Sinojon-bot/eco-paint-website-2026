@@ -26,6 +26,14 @@
 | `admin/` | Панели админ |
 | `preview-server.cjs` | Сервери маҳаллӣ барои санҷиш |
 
+## Силкаҳои интернет (Chrome)
+
+- Сайт: https://sinojon-bot.github.io/eco-paint-website-2026/
+- Админ: https://sinojon-bot.github.io/eco-paint-website-2026/admin/
+
+Дар админ бо Google-и соҳиб ворид шавед → сурат/нархро иваз кунед → «Нигоҳ доштан».
+Тағйирот ба сайти интернетӣ меравад (Firestore). Агар Google `unauthorized-domain` гӯяд, дар Firebase Authorized domains `sinojon-bot.github.io`-ро илова кунед.
+
 ## Ба кор андохтан дар компютер
 
 Node.js лозим аст ([nodejs.org](https://nodejs.org)).
