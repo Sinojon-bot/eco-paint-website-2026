@@ -365,10 +365,10 @@ const DEFAULT_PRODUCTS = [
       zh: "乳胶漆",
       fa: "امولسیون"
     },
-    image: "images/sniezhka.jpg",
+    image: "images/interior.webp",
     variants: [{ weight: 10, price: 75 }, { weight: 20, price: 140 }],
     coverage: 9,
-    colors: ["#ffffff", "#f7f4ef", "#e8dfd0", "#d5c4a8"]
+    colors: ["#f7f4ef", "#e8dfd0", "#d5c4a8", "#c9d9bd"]
   },
   {
     id: 2,
@@ -554,6 +554,8 @@ function upgradePlaceholderProduct(product) {
   const next = { ...product };
   const placeholderName = isPlaceholderProductName(product.name);
   const stubPrices = !product.variants?.length || isStubPricing(product.variants);
+  const uglyPoster = Number(product.id) === 1 &&
+    /sniezhka/i.test(String(product.image || ""));
 
   if (placeholderName) {
     next.name = defaults.name;
@@ -565,10 +567,14 @@ function upgradePlaceholderProduct(product) {
   if (stubPrices) {
     next.variants = defaults.variants.map(variant => ({ ...variant }));
   }
+  if (uglyPoster) {
+    next.image = defaults.image;
+    next.colors = defaults.colors.slice();
+  }
   return normalizeProduct(next);
 }
 
-const PRODUCTS_STORAGE_KEY = "ecoPaintProductsAutoV2";
+const PRODUCTS_STORAGE_KEY = "ecoPaintProductsAutoV3";
 
 function migrateSniezhkaCatalog(products) {
   return products.map(product => {
@@ -589,9 +595,10 @@ function migrateSniezhkaCatalog(products) {
 
 function loadProducts() {
   try {
-    const rawV2 = localStorage.getItem(PRODUCTS_STORAGE_KEY);
+    const rawV3 = localStorage.getItem(PRODUCTS_STORAGE_KEY);
+    const rawV2 = localStorage.getItem("ecoPaintProductsAutoV2");
     const rawV1 = localStorage.getItem("ecoPaintProductsAutoV1");
-    const saved = JSON.parse(rawV2 || rawV1);
+    const saved = JSON.parse(rawV3 || rawV2 || rawV1);
     // Массиви холӣ ҳам натиҷаи дуруст аст: админ метавонад ҳамаи
     // маҳсулотро нест кунад. Дар ин ҳолат маҳсулоти пешфарзро барнагардон.
     if (Array.isArray(saved)) {
@@ -607,7 +614,7 @@ function loadProducts() {
         }
         return product;
       });
-      if (!rawV2) migrated = migrateSniezhkaCatalog(migrated);
+      if (!rawV3) migrated = migrateSniezhkaCatalog(migrated);
       localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(migrated));
       return migrated;
     }

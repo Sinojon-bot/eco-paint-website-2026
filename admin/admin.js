@@ -22,10 +22,10 @@ const DEFAULT_PRODUCTS = [
       "امولسیون اکریلیک فوق‌سفید Eco Paint СНЕЖКА برای دیوار و سقف. برای کار داخلی و خارجی."
     ],
     ["Эмулсия", "Эмульсия", "Emulsion", "乳胶漆", "امولسیون"],
-    "images/sniezhka.jpg",
+    "images/interior.webp",
     [[10, 75], [20, 140]],
     9,
-    ["#ffffff", "#f7f4ef", "#e8dfd0", "#d5c4a8"]
+    ["#f7f4ef", "#e8dfd0", "#d5c4a8", "#c9d9bd"]
   ),
   createDefault(
     2,
@@ -215,6 +215,8 @@ function upgradePlaceholderProduct(product) {
   const next = { ...product };
   const placeholderName = isPlaceholderProductName(product.name);
   const stubPrices = !product.variants?.length || isStubPricing(product.variants);
+  const uglyPoster = Number(product.id) === 1 &&
+    /sniezhka/i.test(String(product.image || ""));
 
   if (placeholderName) {
     next.name = defaults.name;
@@ -226,10 +228,14 @@ function upgradePlaceholderProduct(product) {
   if (stubPrices) {
     next.variants = defaults.variants.map(variant => ({ ...variant }));
   }
+  if (uglyPoster) {
+    next.image = defaults.image;
+    next.colors = defaults.colors.slice();
+  }
   return normalizeProduct(next);
 }
 
-const PRODUCTS_STORAGE_KEY = "ecoPaintProductsAutoV2";
+const PRODUCTS_STORAGE_KEY = "ecoPaintProductsAutoV3";
 
 function migrateSniezhkaCatalog(products) {
   return products.map(product => {
@@ -250,9 +256,10 @@ function migrateSniezhkaCatalog(products) {
 
 function loadProducts() {
   try {
-    const rawV2 = localStorage.getItem(PRODUCTS_STORAGE_KEY);
+    const rawV3 = localStorage.getItem(PRODUCTS_STORAGE_KEY);
+    const rawV2 = localStorage.getItem("ecoPaintProductsAutoV2");
     const rawV1 = localStorage.getItem("ecoPaintProductsAutoV1");
-    const saved = JSON.parse(rawV2 || rawV1);
+    const saved = JSON.parse(rawV3 || rawV2 || rawV1);
     // Массиви холӣ маънои онро дорад, ки маҳсулотҳо аз админ нест шудаанд.
     // Онҳоро аз рӯйхати пешфарз дубора насоз.
     if (Array.isArray(saved)) {
@@ -268,7 +275,7 @@ function loadProducts() {
         }
         return product;
       });
-      if (!rawV2) migrated = migrateSniezhkaCatalog(migrated);
+      if (!rawV3) migrated = migrateSniezhkaCatalog(migrated);
       localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(migrated));
       return migrated;
     }
