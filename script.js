@@ -723,6 +723,11 @@ function htmlText(value) {
   return escapeHTML(localText(value));
 }
 
+function productImage(product) {
+  if (Number(product?.id) === 1) return "images/interior.webp";
+  return product?.image || "images/interior.webp";
+}
+
 const TRANSLATION_LANGUAGE = {
   ru: "ru",
   en: "en",
@@ -897,11 +902,11 @@ function renderProducts() {
         style="--paint-accent:${paintAccents[Math.abs(Number(product.id) - 1) % paintAccents.length]};--card-delay:${cardIndex * 70}ms">
         ${product.discount ? `<span class="discount-badge">-${product.discount}%</span>` : ""}
         <button class="photo details-button" data-details="${product.id}">
-          <img src="${escapeHTML(product.image)}" alt="${htmlText(product.name)}" loading="lazy">
+          <img src="${escapeHTML(productImage(product))}" alt="${htmlText(product.name)}" loading="lazy">
           <span>${tr("buy")}</span>
         </button>
         <div class="paint-motion" aria-hidden="true">
-          <img class="paint-real-lid" src="${escapeHTML(product.image)}" alt="" loading="lazy">
+          <img class="paint-real-lid" src="${escapeHTML(productImage(product))}" alt="" loading="lazy">
           <i class="paint-wave"></i>
           <i class="paint-drop drop-one"></i>
           <i class="paint-drop drop-two"></i>
@@ -984,16 +989,19 @@ function renderWelcomeBuckets() {
   const holder = $("#welcomeBuckets");
   if (!holder) return;
   const accents = ["#13a653", "#347ff0", "#ff7a3d", "#f3c431"];
-  holder.innerHTML = products.slice(0, 4).map((product, index) => `
+  holder.innerHTML = products.slice(0, 4).map((product, index) => {
+    const image = productImage(product);
+    return `
     <div class="welcome-bucket" style="--welcome-paint:${accents[index]};--welcome-delay:${1 + index * .24}s">
-      <img src="${escapeHTML(product.image)}" alt="">
-      <img class="welcome-real-lid" src="${escapeHTML(product.image)}" alt="">
+      <img src="${escapeHTML(image)}" alt="">
+      <img class="welcome-real-lid" src="${escapeHTML(image)}" alt="">
       <i class="welcome-pool"></i>
       <i class="welcome-drop d1"></i>
       <i class="welcome-drop d2"></i>
       <i class="welcome-drop d3"></i>
     </div>
-  `).join("");
+  `;
+  }).join("");
 }
 
 function showProductDetails(id) {
@@ -1003,7 +1011,7 @@ function showProductDetails(id) {
     ? product.variants
     : [{ weight: "", price: 0 }];
   openSheet(`
-    <img class="product-detail-image" src="${escapeHTML(product.image)}" alt="${htmlText(product.name)}">
+    <img class="product-detail-image" src="${escapeHTML(productImage(product))}" alt="${htmlText(product.name)}">
     <small>${htmlText(product.category)}</small>
     <h2>${htmlText(product.name)}</h2>
     <p>${htmlText(product.description)}</p>
@@ -1067,7 +1075,7 @@ function showCart() {
     const variant = cartVariant(product, item);
     return `
       <div class="cartLine">
-        <img src="${escapeHTML(product.image)}" alt="">
+        <img src="${escapeHTML(productImage(product))}" alt="">
         <div>
           <b>${htmlText(product.name)}</b>
           <small>${escapeHTML(sizeLabel(variant))} · ${priceLabel(product, variant)}</small>
