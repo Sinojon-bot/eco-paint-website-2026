@@ -13,19 +13,19 @@ const PLACEHOLDER_PRODUCT_NAMES = new Set([
 const DEFAULT_PRODUCTS = [
   createDefault(
     1,
-    ["Eco Interior", "Eco Interior", "Eco Interior", "Eco Interior 室内漆", "Eco Interior"],
+    ["СНЕЖКА", "СНЕЖКА", "SNEZHKA", "СНЕЖКА 超白漆", "СНЕЖКА"],
     [
-      "Эмулсияи экологии матти барои девор ва шифтҳои дарунӣ. Бӯи кам, фарогирии хуб.",
-      "Экологичная матовая эмульсия для внутренних стен и потолков. Слабый запах, хорошая укрывистость.",
-      "Eco matte emulsion for interior walls and ceilings. Low odor, strong coverage.",
-      "环保哑光乳胶漆，适用于室内墙面与天花板。低气味，遮盖力强。",
-      "امولسیون مات سازگار با محیط‌زیست برای دیوار و سقف داخلی. بوی کم، پوشش خوب."
+      "Эмулсияи акрилии суперсафед Eco Paint СНЕЖКА барои девор ва шифт. Барои корҳои дарунӣ ва берунӣ.",
+      "Супербелая акриловая водоэмульсия Eco Paint СНЕЖКА для стен и потолков. Для внутренних и наружных работ.",
+      "Eco Paint SNEZHKA super-white acrylic emulsion for walls and ceilings. Interior and exterior.",
+      "Eco Paint СНЕЖКА 超白丙烯酸乳胶漆，适用于墙面与天花板，室内外皆可。",
+      "امولسیون اکریلیک فوق‌سفید Eco Paint СНЕЖКА برای دیوار و سقف. برای کار داخلی و خارجی."
     ],
     ["Эмулсия", "Эмульсия", "Emulsion", "乳胶漆", "امولسیون"],
-    "images/interior.webp",
-    [[4, 48], [10, 98], [20, 175]],
+    "images/sniezhka.jpg",
+    [[10, 75], [20, 140]],
     9,
-    ["#f7f4ef", "#e8dfd0", "#d5c4a8", "#c9d9bd"]
+    ["#ffffff", "#f7f4ef", "#e8dfd0", "#d5c4a8"]
   ),
   createDefault(
     2,
@@ -229,15 +229,34 @@ function upgradePlaceholderProduct(product) {
   return normalizeProduct(next);
 }
 
+const PRODUCTS_STORAGE_KEY = "ecoPaintProductsAutoV2";
+
+function migrateSniezhkaCatalog(products) {
+  return products.map(product => {
+    if (Number(product.id) !== 1) return product;
+    const defaults = DEFAULT_PRODUCTS[0];
+    return normalizeProduct({
+      ...product,
+      name: defaults.name,
+      description: defaults.description,
+      category: defaults.category,
+      image: defaults.image,
+      variants: defaults.variants.map(variant => ({ ...variant })),
+      coverage: defaults.coverage,
+      colors: defaults.colors.slice()
+    });
+  });
+}
+
 function loadProducts() {
   try {
-    const saved = JSON.parse(
-      localStorage.getItem("ecoPaintProductsAutoV1")
-    );
+    const rawV2 = localStorage.getItem(PRODUCTS_STORAGE_KEY);
+    const rawV1 = localStorage.getItem("ecoPaintProductsAutoV1");
+    const saved = JSON.parse(rawV2 || rawV1);
     // Массиви холӣ маънои онро дорад, ки маҳсулотҳо аз админ нест шудаанд.
     // Онҳоро аз рӯйхати пешфарз дубора насоз.
     if (Array.isArray(saved)) {
-      const migrated = saved.map(item => {
+      let migrated = saved.map(item => {
         const product = upgradePlaceholderProduct(item);
         if (!product.variants.length) {
           const original = DEFAULT_PRODUCTS.find(
@@ -245,21 +264,19 @@ function loadProducts() {
           );
           product.variants = original
             ? original.variants.map(variant => ({ ...variant }))
-            : [{ weight: 4, price: 48 }, { weight: 10, price: 98 }, { weight: 20, price: 175 }];
+            : [{ weight: 10, price: 75 }, { weight: 20, price: 140 }];
         }
         return product;
       });
-      localStorage.setItem(
-        "ecoPaintProductsAutoV1",
-        JSON.stringify(migrated)
-      );
+      if (!rawV2) migrated = migrateSniezhkaCatalog(migrated);
+      localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(migrated));
       return migrated;
     }
   } catch (error) {
     console.error(error);
   }
   localStorage.setItem(
-    "ecoPaintProductsAutoV1",
+    PRODUCTS_STORAGE_KEY,
     JSON.stringify(DEFAULT_PRODUCTS)
   );
   return DEFAULT_PRODUCTS.map(product => normalizeProduct(product));
@@ -293,9 +310,17 @@ function loadPaymentSettings(remoteSettings) {
 
 function saveProducts() {
   localStorage.setItem(
-    "ecoPaintProductsAutoV1",
+    PRODUCTS_STORAGE_KEY,
     JSON.stringify(products)
   );
+}
+
+function hasLocalAdminSession() {
+  return sessionStorage.getItem("ecoPaintAdmin") === "yes";
+}
+
+function canEditLocally() {
+  return hasLocalAdminSession() || isCloudAdmin(ecoPaintAuth?.currentUser);
 }
 
 const ADMIN_EMAIL = "sinoitojirsandora@gmail.com";
@@ -664,19 +689,33 @@ async function deleteProduct(id) {
   );
   if (!accepted) return;
 
+  if (!canEditLocally()) {
+    alert("Аввал бо admin/12345 ё Google-и админ ворид шавед.");
+    return;
+  }
+
   try {
-    await ensureCloudAdmin();
-    if (cloudCatalogNeedsSeed) await initializeCatalog(products.filter(item => item.id !== id));
-    else {
-      const batch = ecoPaintDb.batch();
-      batch.delete(ecoPaintDb.collection("products").doc(product.cloudId || String(id)));
-      batch.set(ecoPaintDb.collection("settings").doc("catalog"), { initialized: true });
-      await batch.commit();
+    if (isCloudAdmin(ecoPaintAuth?.currentUser)) {
+      await ensureCloudAdmin();
+      if (cloudCatalogNeedsSeed) await initializeCatalog(products.filter(item => item.id !== id));
+      else {
+        const batch = ecoPaintDb.batch();
+        batch.delete(ecoPaintDb.collection("products").doc(product.cloudId || String(id)));
+        batch.set(ecoPaintDb.collection("settings").doc("catalog"), { initialized: true });
+        await batch.commit();
+      }
+      products = products.filter(item => item.id !== id);
+      saveProducts();
+      renderProducts();
+      showToast("Маҳсулот аз ҳамаи дастгоҳҳо нест карда шуд");
+      return;
     }
+
     products = products.filter(item => item.id !== id);
     saveProducts();
     renderProducts();
-    showToast("Маҳсулот аз ҳамаи дастгоҳҳо нест карда шуд");
+    setCloudStatus("Маҳсулот дар ин компютер нест шуд. Барои сайти интернетӣ бо Google-и админ пайваст шавед.");
+    showToast("Маҳсулот нест карда шуд");
   } catch (error) {
     setCloudStatus(adminError(error), true);
     alert(adminError(error));
@@ -820,8 +859,15 @@ async function translateProduct(tajikText, previous) {
 $("#productForm").onsubmit = async event => {
   event.preventDefault();
   const id = Number($("#productId").value) || Date.now();
-  try { await ensureCloudAdmin(); }
-  catch (error) { setCloudStatus(adminError(error), true); alert(adminError(error)); return; }
+  if (!canEditLocally()) {
+    alert("Аввал бо admin/12345 ё Google-и админ ворид шавед.");
+    return;
+  }
+  const cloudSave = isCloudAdmin(ecoPaintAuth?.currentUser);
+  if (cloudSave) {
+    try { await ensureCloudAdmin(); }
+    catch (error) { setCloudStatus(adminError(error), true); alert(adminError(error)); return; }
+  }
   const previous = products.find(item => item.id === id);
   let image;
 
@@ -894,23 +940,33 @@ $("#productForm").onsubmit = async event => {
   }
   const index = products.findIndex(item => item.id === id);
 
-  try {
-    saveButton.textContent = "Дар сервер нигоҳ дошта мешавад...";
-    await saveProductToCloud(product);
-  } catch (error) {
-    setCloudStatus(adminError(error), true);
-    alert(adminError(error));
-    saveButton.disabled = false;
-    saveButton.textContent = "Нигоҳ доштан ва тарҷума кардан";
-    return;
+  if (cloudSave) {
+    try {
+      saveButton.textContent = "Дар сервер нигоҳ дошта мешавад...";
+      await saveProductToCloud(product);
+    } catch (error) {
+      setCloudStatus(adminError(error), true);
+      alert(adminError(error));
+      saveButton.disabled = false;
+      saveButton.textContent = "Нигоҳ доштан ва тарҷума кардан";
+      return;
+    }
   }
 
   if (index >= 0) products[index] = product;
   else products.push(product);
   try { saveProducts(); }
-  catch { setCloudStatus("Дар сервер нигоҳ дошта шуд. Хотираи браузер пур аст; саҳифаро нав кунед.", true); }
-  if (translated.translationPending) setCloudStatus("Маҳсулот нигоҳ дошта шуд. Тарҷума дастрас набуд; матн дар дигар забонҳо муваққатан тоҷикӣ аст ва аз форма тағйир дода мешавад.");
-  else setCloudStatus("Тағйирот дар сервер нигоҳ дошта шуд ва барои ҳамаи харидорон дастрас аст.");
+  catch {
+    setCloudStatus(cloudSave
+      ? "Дар сервер нигоҳ дошта шуд. Хотираи браузер пур аст; саҳифаро нав кунед."
+      : "Хотираи браузер пур аст; сурати хурдтар интихоб кунед.", true);
+  }
+  if (cloudSave) {
+    if (translated.translationPending) setCloudStatus("Маҳсулот нигоҳ дошта шуд. Тарҷума дастрас набуд; матн дар дигар забонҳо муваққатан тоҷикӣ аст ва аз форма тағйир дода мешавад.");
+    else setCloudStatus("Тағйирот дар сервер нигоҳ дошта шуд ва барои ҳамаи харидорон дастрас аст.");
+  } else {
+    setCloudStatus("Маҳсулот дар ин компютер нигоҳ дошта шуд. Барои сайти интернетӣ бо Google-и админ пайваст шавед.");
+  }
 
   saveButton.disabled = false;
   saveButton.textContent = "Нигоҳ доштан ва тарҷума кардан";
@@ -956,17 +1012,27 @@ $("#paymentForm").onsubmit = async event => {
     receiptSuccessWords: $("#receiptSuccessWords").value
       .split(",").map(word => word.trim().toLowerCase()).filter(Boolean)
   };
+  if (!canEditLocally()) {
+    alert("Аввал бо admin/12345 ё Google-и админ ворид шавед.");
+    return;
+  }
   const saveButton = event.target.querySelector("button[type='submit'], button.save");
   saveButton.disabled = true;
   try {
-    await ensureCloudAdmin();
-    await ecoPaintDb.collection("settings").doc("payment").set({
-      ...settings,
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-    localStorage.setItem("ecoPaintPaymentSettings", JSON.stringify(settings));
-    setCloudStatus("Танзими пардохт дар сервер нигоҳ дошта шуд.");
-    showToast("Пардохт дар ҳамаи дастгоҳҳо нав шуд");
+    if (isCloudAdmin(ecoPaintAuth?.currentUser)) {
+      await ensureCloudAdmin();
+      await ecoPaintDb.collection("settings").doc("payment").set({
+        ...settings,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      localStorage.setItem("ecoPaintPaymentSettings", JSON.stringify(settings));
+      setCloudStatus("Танзими пардохт дар сервер нигоҳ дошта шуд.");
+      showToast("Пардохт дар ҳамаи дастгоҳҳо нав шуд");
+    } else {
+      localStorage.setItem("ecoPaintPaymentSettings", JSON.stringify(settings));
+      setCloudStatus("Пардохт дар ин компютер нигоҳ дошта шуд. Барои сайтҳои интернетӣ бо Google-и админ пайваст шавед.");
+      showToast("Пардохт нигоҳ дошта шуд");
+    }
   } catch (error) {
     setCloudStatus(adminError(error), true);
     alert(adminError(error));

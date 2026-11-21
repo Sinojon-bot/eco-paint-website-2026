@@ -345,18 +345,18 @@ const DEFAULT_PRODUCTS = [
   {
     id: 1,
     name: {
-      tg: "Eco Interior",
-      ru: "Eco Interior",
-      en: "Eco Interior",
-      zh: "Eco Interior 室内漆",
-      fa: "Eco Interior"
+      tg: "СНЕЖКА",
+      ru: "СНЕЖКА",
+      en: "SNEZHKA",
+      zh: "СНЕЖКА 超白漆",
+      fa: "СНЕЖКА"
     },
     description: {
-      tg: "Эмулсияи экологии матти барои девор ва шифтҳои дарунӣ. Бӯи кам, фарогирии хуб.",
-      ru: "Экологичная матовая эмульсия для внутренних стен и потолков. Слабый запах, хорошая укрывистость.",
-      en: "Eco matte emulsion for interior walls and ceilings. Low odor, strong coverage.",
-      zh: "环保哑光乳胶漆，适用于室内墙面与天花板。低气味，遮盖力强。",
-      fa: "امولسیون مات سازگار با محیط‌زیست برای دیوار و سقف داخلی. بوی کم، پوشش خوب."
+      tg: "Эмулсияи акрилии суперсафед Eco Paint СНЕЖКА барои девор ва шифт. Барои корҳои дарунӣ ва берунӣ.",
+      ru: "Супербелая акриловая водоэмульсия Eco Paint СНЕЖКА для стен и потолков. Для внутренних и наружных работ.",
+      en: "Eco Paint SNEZHKA super-white acrylic emulsion for walls and ceilings. Interior and exterior.",
+      zh: "Eco Paint СНЕЖКА 超白丙烯酸乳胶漆，适用于墙面与天花板，室内外皆可。",
+      fa: "امولسیون اکریلیک فوق‌سفید Eco Paint СНЕЖКА برای دیوار و سقف. برای کار داخلی و خارجی."
     },
     category: {
       tg: "Эмулсия",
@@ -365,10 +365,10 @@ const DEFAULT_PRODUCTS = [
       zh: "乳胶漆",
       fa: "امولسیون"
     },
-    image: "images/interior.webp",
-    variants: [{ weight: 4, price: 48 }, { weight: 10, price: 98 }, { weight: 20, price: 175 }],
+    image: "images/sniezhka.jpg",
+    variants: [{ weight: 10, price: 75 }, { weight: 20, price: 140 }],
     coverage: 9,
-    colors: ["#f7f4ef", "#e8dfd0", "#d5c4a8", "#c9d9bd"]
+    colors: ["#ffffff", "#f7f4ef", "#e8dfd0", "#d5c4a8"]
   },
   {
     id: 2,
@@ -568,15 +568,34 @@ function upgradePlaceholderProduct(product) {
   return normalizeProduct(next);
 }
 
+const PRODUCTS_STORAGE_KEY = "ecoPaintProductsAutoV2";
+
+function migrateSniezhkaCatalog(products) {
+  return products.map(product => {
+    if (Number(product.id) !== 1) return product;
+    const defaults = DEFAULT_PRODUCTS[0];
+    return normalizeProduct({
+      ...product,
+      name: defaults.name,
+      description: defaults.description,
+      category: defaults.category,
+      image: defaults.image,
+      variants: defaults.variants.map(variant => ({ ...variant })),
+      coverage: defaults.coverage,
+      colors: defaults.colors.slice()
+    });
+  });
+}
+
 function loadProducts() {
   try {
-    const saved = JSON.parse(
-      localStorage.getItem("ecoPaintProductsAutoV1")
-    );
+    const rawV2 = localStorage.getItem(PRODUCTS_STORAGE_KEY);
+    const rawV1 = localStorage.getItem("ecoPaintProductsAutoV1");
+    const saved = JSON.parse(rawV2 || rawV1);
     // Массиви холӣ ҳам натиҷаи дуруст аст: админ метавонад ҳамаи
     // маҳсулотро нест кунад. Дар ин ҳолат маҳсулоти пешфарзро барнагардон.
     if (Array.isArray(saved)) {
-      const migrated = saved.map(item => {
+      let migrated = saved.map(item => {
         const product = upgradePlaceholderProduct(item);
         if (!product.variants.length) {
           const original = DEFAULT_PRODUCTS.find(
@@ -584,14 +603,12 @@ function loadProducts() {
           );
           product.variants = original
             ? original.variants.map(variant => ({ ...variant }))
-            : [{ weight: 4, price: 48 }, { weight: 10, price: 98 }, { weight: 20, price: 175 }];
+            : [{ weight: 10, price: 75 }, { weight: 20, price: 140 }];
         }
         return product;
       });
-      localStorage.setItem(
-        "ecoPaintProductsAutoV1",
-        JSON.stringify(migrated)
-      );
+      if (!rawV2) migrated = migrateSniezhkaCatalog(migrated);
+      localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(migrated));
       return migrated;
     }
   } catch (error) {
@@ -600,7 +617,7 @@ function loadProducts() {
 
   const normalizedDefaults = DEFAULT_PRODUCTS.map(normalizeProduct);
   localStorage.setItem(
-    "ecoPaintProductsAutoV1",
+    PRODUCTS_STORAGE_KEY,
     JSON.stringify(normalizedDefaults)
   );
   return normalizedDefaults;
@@ -665,7 +682,7 @@ function startCloudCatalog() {
     products = latestSnapshot.docs
       .map(document => upgradePlaceholderProduct(document.data()))
       .sort((a, b) => a.id - b.id);
-    localStorage.setItem("ecoPaintProductsAutoV1", JSON.stringify(products));
+    localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(products));
     pruneCart();
     renderCategories();
     renderProducts();
@@ -782,7 +799,7 @@ async function translateOldProducts(targetLanguage) {
 
   await Promise.all(jobs);
   localStorage.setItem(
-    "ecoPaintProductsAutoV1",
+    PRODUCTS_STORAGE_KEY,
     JSON.stringify(products)
   );
 }
@@ -2084,7 +2101,7 @@ $("#quickRegister").onsubmit = async event => {
 };
 
 window.addEventListener("storage", event => {
-  if (event.key === "ecoPaintProductsAutoV1") {
+  if (event.key === PRODUCTS_STORAGE_KEY || event.key === "ecoPaintProductsAutoV1") {
     products = loadProducts();
     pruneCart();
     renderCategories();
