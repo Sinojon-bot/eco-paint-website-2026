@@ -1019,15 +1019,32 @@ header {
 @keyframes welcome-word { to {opacity:1;transform:none} }
 
 @media (max-width:760px) {
-  .welcome-page { min-height:calc(100vh - 150px); padding:28px 3% 100px; overflow-x:hidden; }
-  .welcome-page::before { inset:2% 1.5% 5%; border-radius:28px; }
-  .welcome-copy { margin:0 auto 10px; font-size:clamp(1.85rem,10.5vw,3.4rem); max-width:96%; }
-  .welcome-buckets { height:260px; width:100%; margin-left:0; max-width:100%; }
+  .welcome-page { min-height:calc(100dvh - 150px); padding:22px 3% 108px; overflow-x:hidden; }
+  .welcome-page::before { inset:1.5% 1% 4%; border-radius:26px; }
+  .welcome-copy { margin:0 auto 8px; font-size:clamp(1.9rem,11vw,3.2rem); max-width:96%; letter-spacing:-.05em; }
+  .welcome-buckets { height:240px; width:100%; margin-left:0; max-width:100%; }
   .welcome-bucket { width:31%; margin:0 -3%; }
-  .welcome-bucket img { height:200px; }
+  .welcome-bucket img { height:188px; }
   .welcome-bucket:nth-child(4) { display:none; }
   .welcome-lid { top:12%; border-width:3px; }
-  .welcome-catalog { margin:8px auto 0; min-height:48px; padding:0 22px; font-size:16px; }
+  .welcome-catalog {
+    margin:12px auto 0;
+    width:min(100%,340px);
+    min-height:52px;
+    justify-content:center;
+    padding:0 18px;
+    font-size:15px;
+    border-radius:16px;
+  }
+  .feature-bar { padding-top:10px; gap:8px; }
+  .feature-bar button { width:100%; min-height:52px; border-radius:14px; }
+  .card:hover { transform:none; box-shadow:0 10px 28px #113d2410; }
+  .card:hover .photo img { transform:none; filter:drop-shadow(0 12px 10px #17372033); }
+  .card:hover .paint-real-lid,
+  .card:hover .paint-wave,
+  .card:hover .paint-drop,
+  .card:hover .product-hover-info { opacity:0 !important; transform:none !important; animation:none !important; }
+  .product-hover-info { display:none; }
 }
 
 /* Use the photographed lid itself; no drawn replacement lid. */

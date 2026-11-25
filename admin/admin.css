@@ -156,6 +156,7 @@ button {
 .online-admin { color:var(--green); }
 .cloud-connection { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; margin-bottom:22px; padding:16px; border:1px solid var(--line); border-radius:16px; background:white; }
 .cloud-connection p { margin:0; flex:1 1 280px; font-size:14px; line-height:1.6; overflow-wrap:anywhere; }
+.cloud-actions { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
 .cloud-connection div { display:flex; flex-wrap:wrap; gap:8px; }
 .cloud-connection .is-error { color:var(--red); }
 button:disabled { opacity:.55; cursor:wait; }
@@ -465,6 +466,44 @@ button:disabled { opacity:.55; cursor:wait; }
 
   .price-row {
     grid-template-columns:1fr 1fr auto
+  }
+
+  .cloud-connection {
+    padding:12px
+  }
+
+  .cloud-actions {
+    width:100%
+  }
+
+  .cloud-actions .primary,
+  .cloud-actions .secondary,
+  .cloud-actions a.secondary {
+    flex:1 1 calc(50% - 8px);
+    justify-content:center;
+    min-height:46px;
+    text-align:center
+  }
+
+  main {
+    padding:14px
+  }
+
+  .admin-view aside {
+    position:sticky;
+    top:0;
+    z-index:40;
+    background:#fff;
+    box-shadow:0 8px 20px #10241812
+  }
+
+  .fields .save,
+  .primary.save {
+    position:sticky;
+    bottom:10px;
+    z-index:30;
+    min-height:52px;
+    box-shadow:0 10px 28px #08753235
   }
 
 }

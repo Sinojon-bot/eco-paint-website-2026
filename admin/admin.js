@@ -232,6 +232,36 @@ function upgradePlaceholderProduct(product) {
 }
 
 const PRODUCTS_STORAGE_KEY = "ecoPaintProductsAutoV4";
+const PRODUCTS_BACKUP_KEY = "ecoPaintProductsBackupV4";
+
+function catalogScore(list) {
+  if (!Array.isArray(list) || !list.length) return 0;
+  return list.reduce((score, item) => {
+    let points = 1;
+    if (String(item?.image || "").startsWith("data:image/")) points += 8;
+    if (Array.isArray(item?.variants) && item.variants.length) points += item.variants.length;
+    if (item?.name?.tg || item?.name) points += 1;
+    return score + points;
+  }, 0);
+}
+
+function normalizeCatalogList(list) {
+  return list.map(item => {
+    const product = upgradePlaceholderProduct(item);
+    if (!product.variants.length) {
+      const original = DEFAULT_PRODUCTS.find(
+        defaultProduct => defaultProduct.id === product.id
+      );
+      product.variants = original
+        ? original.variants.map(variant => ({ ...variant }))
+        : [{ weight: 10, price: 75 }, { weight: 20, price: 140 }];
+    }
+    if (Number(product.id) === 1 && /images\/interior\.(webp|png)$/i.test(String(product.image || ""))) {
+      product.image = "images/sniezhka.jpg";
+    }
+    return product;
+  });
+}
 
 function loadProducts() {
   try {
@@ -239,37 +269,30 @@ function loadProducts() {
     const rawV3 = localStorage.getItem("ecoPaintProductsAutoV3");
     const rawV2 = localStorage.getItem("ecoPaintProductsAutoV2");
     const rawV1 = localStorage.getItem("ecoPaintProductsAutoV1");
-    const saved = JSON.parse(rawV4 || rawV3 || rawV2 || rawV1);
-    // Массиви холӣ маънои онро дорад, ки маҳсулотҳо аз админ нест шудаанд.
-    // Муҳим: маълумоти админро overwrite накун.
-    if (Array.isArray(saved)) {
-      const migrated = saved.map(item => {
-        const product = upgradePlaceholderProduct(item);
-        if (!product.variants.length) {
-          const original = DEFAULT_PRODUCTS.find(
-            defaultProduct => defaultProduct.id === product.id
-          );
-          product.variants = original
-            ? original.variants.map(variant => ({ ...variant }))
-            : [{ weight: 10, price: 75 }, { weight: 20, price: 140 }];
-        }
-        // Барқарории сурати СНЕЖКА агар ба interior.webp иваз шуда бошад.
-        if (Number(product.id) === 1 && /images\/interior\.(webp|png)$/i.test(String(product.image || ""))) {
-          product.image = "images/sniezhka.jpg";
-        }
-        return product;
-      });
+    const rawBackup = localStorage.getItem(PRODUCTS_BACKUP_KEY);
+    const candidates = [rawV4, rawV3, rawV2, rawV1, rawBackup]
+      .map(raw => {
+        try { return JSON.parse(raw); }
+        catch { return null; }
+      })
+      .filter(Array.isArray);
+    // Беҳтарин нусхаро гир — то маълумоти админ аз байн наравад.
+    candidates.sort((a, b) => catalogScore(b) - catalogScore(a));
+    const saved = candidates[0];
+    if (Array.isArray(saved) && saved.length) {
+      const migrated = normalizeCatalogList(saved);
       localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(migrated));
+      localStorage.setItem(PRODUCTS_BACKUP_KEY, JSON.stringify(migrated));
       return migrated;
     }
+    if (Array.isArray(saved)) return saved;
   } catch (error) {
     console.error(error);
   }
-  localStorage.setItem(
-    PRODUCTS_STORAGE_KEY,
-    JSON.stringify(DEFAULT_PRODUCTS)
-  );
-  return DEFAULT_PRODUCTS.map(product => normalizeProduct(product));
+  const defaults = DEFAULT_PRODUCTS.map(product => normalizeProduct(product));
+  localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(defaults));
+  localStorage.setItem(PRODUCTS_BACKUP_KEY, JSON.stringify(defaults));
+  return defaults;
 }
 
 const $ = selector => document.querySelector(selector);
@@ -299,10 +322,35 @@ function loadPaymentSettings(remoteSettings) {
 }
 
 function saveProducts() {
-  localStorage.setItem(
-    PRODUCTS_STORAGE_KEY,
-    JSON.stringify(products)
-  );
+  const payload = JSON.stringify(products);
+  localStorage.setItem(PRODUCTS_STORAGE_KEY, payload);
+  // Нусхаи эҳтиётӣ — агар асосӣ вайрон шавад, барқарор мешавад.
+  if (Array.isArray(products) && products.length) {
+    localStorage.setItem(PRODUCTS_BACKUP_KEY, payload);
+    localStorage.setItem("ecoPaintProductsAutoV3", payload);
+  }
+}
+
+function restoreProductsFromBackup() {
+  try {
+    const raw = localStorage.getItem(PRODUCTS_BACKUP_KEY)
+      || localStorage.getItem("ecoPaintProductsAutoV3")
+      || localStorage.getItem("ecoPaintProductsAutoV2");
+    const saved = JSON.parse(raw || "null");
+    if (!Array.isArray(saved) || !saved.length) {
+      setCloudStatus("Нусхаи эҳтиётӣ ёфт нашуд.", true);
+      return false;
+    }
+    products = normalizeCatalogList(saved);
+    saveProducts();
+    renderProducts();
+    setCloudStatus(`Аз нусха барқарор шуд · ${products.length} маҳсулот. «Фиристодан ба интернет»-ро пахш кунед.`);
+    showToast("Маҳсулотҳо барқарор шуданд");
+    return true;
+  } catch (error) {
+    setCloudStatus(adminError(error), true);
+    return false;
+  }
 }
 
 function hasLocalAdminSession() {
@@ -425,19 +473,20 @@ async function seedOrLoadCloudProducts() {
       return isPlaceholderProductName(product.name) || isStubPricing(variants);
     });
 
-    // Агар сервер холӣ ё stub бошад — маҳаллиро нигоҳ дор, overwrite накун.
-    if (!rawProducts.length) {
+    // Агар сервер холӣ/заиф бошад — маҳаллиро нигоҳ дор, overwrite накун.
+    const cloudList = rawProducts
+      .map(item => {
+        const { cloudId, ...data } = item;
+        return { ...upgradePlaceholderProduct(data), cloudId };
+      })
+      .sort((a, b) => a.id - b.id);
+    if (!cloudList.length || catalogScore(localProducts) > catalogScore(cloudList)) {
       products = localProducts;
     } else {
-      products = rawProducts
-        .map(item => {
-          const { cloudId, ...data } = item;
-          return { ...upgradePlaceholderProduct(data), cloudId };
-        })
-        .sort((a, b) => a.id - b.id);
+      products = cloudList;
     }
 
-    if (needsCloudUpgrade || !rawProducts.length) {
+    if (needsCloudUpgrade || !rawProducts.length || catalogScore(localProducts) > catalogScore(cloudList)) {
       await publishCatalogToInternet(products);
       upgradedCloudCatalog = true;
     }
@@ -574,6 +623,14 @@ async function loadCustomers() {
 }
 
 $("#publishInternet").onclick = publishNow;
+$("#restoreBackup").onclick = () => {
+  if (!canEditLocally()) {
+    alert("Аввал бо admin / 12345 ворид шавед.");
+    return;
+  }
+  if (!confirm("Маҳсулотҳо аз нусхаи эҳтиётӣ барқарор шаванд?")) return;
+  restoreProductsFromBackup();
+};
 $("#refreshAdmin").onclick = async () => {
   try {
     products = loadProducts();

@@ -664,12 +664,27 @@ function pruneCart() {
   }
 }
 
+function catalogScore(list) {
+  if (!Array.isArray(list) || !list.length) return 0;
+  return list.reduce((score, item) => {
+    let points = 1;
+    if (String(item?.image || "").startsWith("data:image/")) points += 8;
+    if (Array.isArray(item?.variants) && item.variants.length) points += item.variants.length;
+    return score + points;
+  }, 0);
+}
+
 function applyRemoteProducts(list) {
   if (!Array.isArray(list) || !list.length) return false;
+  // Агар маҳаллӣ бойтар бошад (сурати админ), сервери холиро қабул накун.
+  if (catalogScore(products) > catalogScore(list) + 2) return false;
   products = list
     .map(item => upgradePlaceholderProduct(item))
     .sort((a, b) => a.id - b.id);
   localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(products));
+  if (products.length) {
+    localStorage.setItem("ecoPaintProductsBackupV4", JSON.stringify(products));
+  }
   pruneCart();
   renderCategories();
   renderProducts();
