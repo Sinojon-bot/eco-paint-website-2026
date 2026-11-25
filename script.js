@@ -665,6 +665,7 @@ function productById(id) {
 }
 
 function cartVariant(product, item) {
+  if (!product?.variants?.length) return { weight: item?.weight || "", price: 0 };
   return product.variants.find(variant =>
     String(variant.weight) === String(item.weight)
   ) || { weight: "", price: 0 };
@@ -724,7 +725,7 @@ function htmlText(value) {
 }
 
 function productImage(product) {
-  if (Number(product?.id) === 1) return "images/interior.webp";
+  // Admin-uploaded images must show on the live site; only fall back if missing.
   return product?.image || "images/interior.webp";
 }
 
@@ -1791,28 +1792,28 @@ function applyLanguage() {
   loadProfile();
 }
 
+let languageRequestId = 0;
 document.querySelectorAll("[data-lang]").forEach(button => {
   button.onclick = async () => {
+    const requestId = ++languageRequestId;
     language = button.dataset.lang;
     applyLanguage();
     const picker = document.querySelector(".language-picker");
     picker.classList.add("loading");
-    document.querySelectorAll("[data-lang]").forEach(item => {
-      item.disabled = true;
-    });
 
     try {
       await translateOldProducts(language);
+      if (requestId !== languageRequestId) return;
       renderCategories();
       renderProducts();
     } catch (error) {
+      if (requestId !== languageRequestId) return;
       console.error(error);
       alert("Тарҷума иҷро нашуд. Интернетро санҷед.");
     } finally {
-      picker.classList.remove("loading");
-      document.querySelectorAll("[data-lang]").forEach(item => {
-        item.disabled = false;
-      });
+      if (requestId === languageRequestId) {
+        picker.classList.remove("loading");
+      }
     }
   };
 });
