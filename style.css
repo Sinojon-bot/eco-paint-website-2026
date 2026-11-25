@@ -419,17 +419,34 @@ header {
 }
 
 @media(max-width:760px) {
+  .app {
+    padding-bottom:calc(88px + env(safe-area-inset-bottom,0px))
+  }
+
   header {
-    padding:9px 4%
+    padding:8px 3.5%;
+    gap:8px
   }
 
   .logo {
-    min-width:74px;
-    font-size:21px
+    min-width:68px;
+    font-size:19px
   }
 
   .logo b {
-    font-size:25px
+    font-size:23px
+  }
+
+  .search {
+    height:44px;
+    font-size:18px;
+    border-radius:14px
+  }
+
+  .cartBtn {
+    width:44px;
+    height:44px;
+    border-radius:13px
   }
 
   .grid {
@@ -438,19 +455,38 @@ header {
   }
 
   .photo {
-    height:185px
+    height:170px
   }
 
   .card {
-    padding:10px
+    padding:10px;
+    border-radius:16px
   }
 
   .card h3 {
     font-size:15px
   }
 
+  .card .action,
+  .card button {
+    min-height:42px
+  }
+
   .sheet {
-    border-radius:25px 25px 0 0
+    border-radius:25px 25px 0 0;
+    max-height:min(92vh,920px);
+    padding-bottom:calc(18px + env(safe-area-inset-bottom,0px))
+  }
+
+  .bottom {
+    padding-bottom:env(safe-area-inset-bottom,0px);
+    height:auto;
+    min-height:68px
+  }
+
+  .bottom button {
+    min-height:52px;
+    font-size:12px
   }
 
 }
@@ -463,11 +499,16 @@ header {
   }
 
   .photo {
-    height:155px
+    height:148px
   }
 
   .logo {
-    min-width:66px
+    min-width:60px
+  }
+
+  .language-picker button {
+    width:26px;
+    height:26px
   }
 
 }

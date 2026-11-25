@@ -215,9 +215,9 @@ function upgradePlaceholderProduct(product) {
   const next = { ...product };
   const placeholderName = isPlaceholderProductName(product.name);
   const stubPrices = !product.variants?.length || isStubPricing(product.variants);
-  const uglyPoster = Number(product.id) === 1 &&
-    /sniezhka/i.test(String(product.image || ""));
 
+  // Танҳо номҳои INTERIOR/FACADE ва нархи stub-ро нав кун.
+  // Сурат/нарх/матни админро ҳеҷ гоҳ нест накун.
   if (placeholderName) {
     next.name = defaults.name;
     next.description = defaults.description;
@@ -228,42 +228,22 @@ function upgradePlaceholderProduct(product) {
   if (stubPrices) {
     next.variants = defaults.variants.map(variant => ({ ...variant }));
   }
-  if (uglyPoster) {
-    next.image = defaults.image;
-    next.colors = defaults.colors.slice();
-  }
   return normalizeProduct(next);
 }
 
-const PRODUCTS_STORAGE_KEY = "ecoPaintProductsAutoV3";
-
-function migrateSniezhkaCatalog(products) {
-  return products.map(product => {
-    if (Number(product.id) !== 1) return product;
-    const defaults = DEFAULT_PRODUCTS[0];
-    return normalizeProduct({
-      ...product,
-      name: defaults.name,
-      description: defaults.description,
-      category: defaults.category,
-      image: defaults.image,
-      variants: defaults.variants.map(variant => ({ ...variant })),
-      coverage: defaults.coverage,
-      colors: defaults.colors.slice()
-    });
-  });
-}
+const PRODUCTS_STORAGE_KEY = "ecoPaintProductsAutoV4";
 
 function loadProducts() {
   try {
-    const rawV3 = localStorage.getItem(PRODUCTS_STORAGE_KEY);
+    const rawV4 = localStorage.getItem(PRODUCTS_STORAGE_KEY);
+    const rawV3 = localStorage.getItem("ecoPaintProductsAutoV3");
     const rawV2 = localStorage.getItem("ecoPaintProductsAutoV2");
     const rawV1 = localStorage.getItem("ecoPaintProductsAutoV1");
-    const saved = JSON.parse(rawV3 || rawV2 || rawV1);
+    const saved = JSON.parse(rawV4 || rawV3 || rawV2 || rawV1);
     // Массиви холӣ маънои онро дорад, ки маҳсулотҳо аз админ нест шудаанд.
-    // Онҳоро аз рӯйхати пешфарз дубора насоз.
+    // Муҳим: маълумоти админро overwrite накун.
     if (Array.isArray(saved)) {
-      let migrated = saved.map(item => {
+      const migrated = saved.map(item => {
         const product = upgradePlaceholderProduct(item);
         if (!product.variants.length) {
           const original = DEFAULT_PRODUCTS.find(
@@ -275,7 +255,6 @@ function loadProducts() {
         }
         return product;
       });
-      if (!rawV3) migrated = migrateSniezhkaCatalog(migrated);
       localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(migrated));
       return migrated;
     }
@@ -375,8 +354,50 @@ async function ensureCloudAdmin() {
   return user;
 }
 
+function estimateJsonBytes(value) {
+  try {
+    return new Blob([JSON.stringify(value)]).size;
+  } catch {
+    return String(JSON.stringify(value) || "").length;
+  }
+}
+
+function recompressDataUrl(dataUrl, maximumSize = 480, quality = 0.68) {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => {
+      const scale = Math.min(1, maximumSize / Math.max(image.width, image.height));
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.max(1, Math.round(image.width * scale));
+      canvas.height = Math.max(1, Math.round(image.height * scale));
+      canvas.getContext("2d").drawImage(image, 0, 0, canvas.width, canvas.height);
+      resolve(canvas.toDataURL("image/jpeg", quality));
+    };
+    image.onerror = reject;
+    image.src = dataUrl;
+  });
+}
+
+async function prepareProductForCloud(product) {
+  const next = { ...product };
+  if (typeof next.image === "string" && next.image.startsWith("data:image/")) {
+    let image = next.image;
+    if (image.length > 180000) image = await recompressDataUrl(image, 480, 0.68);
+    if (image.length > 180000) image = await recompressDataUrl(image, 360, 0.58);
+    if (image.length > 220000) {
+      throw new Error("Сурат хеле калон аст (мегабайт). Сурати хурдтар интихоб кунед, то дар телефон ҳам барояд.");
+    }
+    next.image = image;
+  }
+  if (estimateJsonBytes(next) > 900000) {
+    throw new Error("Маҳсулот барои сервер калон аст. Сурати хурдтар гузоред — тағйироти дигар нигоҳ дошта мешаванд.");
+  }
+  return next;
+}
+
 async function seedOrLoadCloudProducts() {
   await ensureCloudAdmin();
+  const localProducts = products.slice();
   const [snapshot, payment, catalog] = await Promise.all([
     ecoPaintDb.collection("products").get({ source: "server" }),
     ecoPaintDb.collection("settings").doc("payment").get({ source: "server" }),
@@ -384,7 +405,28 @@ async function seedOrLoadCloudProducts() {
   ]);
   cloudCatalogNeedsSeed = snapshot.empty && !catalog.data()?.initialized;
   let upgradedCloudCatalog = false;
-  if (!cloudCatalogNeedsSeed) {
+  let autoSeeded = false;
+
+  if (cloudCatalogNeedsSeed) {
+    // Автоматӣ каталоги ҳозираро (бо тағйироти админ) ба интернет фирист —
+    // то телефон ҳамон чизро бинад. Маълумоти маҳаллиро нест намекунем.
+    try {
+      const prepared = [];
+      for (const item of localProducts) {
+        prepared.push(await prepareProductForCloud(item));
+      }
+      products = prepared;
+      await initializeCatalog(prepared);
+      autoSeeded = true;
+      cloudCatalogNeedsSeed = false;
+    } catch (error) {
+      products = localProducts;
+      setCloudStatus(adminError(error), true);
+      saveProducts();
+      renderProducts();
+      return;
+    }
+  } else {
     const rawProducts = snapshot.docs.map(document => ({
       ...document.data(),
       cloudId: document.id
@@ -414,28 +456,36 @@ async function seedOrLoadCloudProducts() {
     loadPaymentSettings(payment.data());
   }
   renderProducts();
-  if (cloudCatalogNeedsSeed) {
-    setCloudStatus("Пайваст шуд. Сабти аввали маҳсулот онҳоро ба сайти интернетӣ мегузаронад.");
+  if (autoSeeded) {
+    setCloudStatus(`Каталог ба интернет рафт · ${products.length} маҳсулот. Ҳоло дар телефон ҳам ҳаминро мебинед (саҳифаро нав кунед).`);
   } else if (upgradedCloudCatalog) {
     setCloudStatus(`Каталог нав шуд · ${products.length} маҳсулот дар интернет. Сурат/нархро тағйир диҳед ва нигоҳ доред.`);
   } else {
-    setCloudStatus(`Пайваст: ${ecoPaintAuth.currentUser.email} · ${products.length} маҳсулот. Тағйирот баъд аз «Нигоҳ доштан» дар сайт дида мешавад.`);
+    setCloudStatus(`Пайваст: ${ecoPaintAuth.currentUser.email} · ${products.length} маҳсулот. Тағйирот баъд аз «Нигоҳ доштан» дар телефон ҳам мебарояд.`);
   }
 }
 
 async function saveProductToCloud(product) {
   await ensureCloudAdmin();
+  const ready = await prepareProductForCloud(product);
   if (cloudCatalogNeedsSeed) {
     const initial = new Map(products.map(item => [item.id, item]));
-    initial.set(product.id, product);
-    await initializeCatalog([...initial.values()]);
-    return;
+    initial.set(ready.id, ready);
+    const prepared = [];
+    for (const item of initial.values()) {
+      prepared.push(await prepareProductForCloud(item));
+    }
+    await initializeCatalog(prepared);
+    Object.assign(product, ready);
+    return ready;
   }
-  const { cloudId, ...data } = product;
-  await ecoPaintDb.collection("products").doc(cloudId || String(product.id)).set({
+  const { cloudId, ...data } = ready;
+  await ecoPaintDb.collection("products").doc(cloudId || String(ready.id)).set({
     ...data,
     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
   }, { merge: true });
+  Object.assign(product, ready);
+  return ready;
 }
 
 async function initializeCatalog(items) {
@@ -740,14 +790,15 @@ function readImage(file) {
     reader.onload = () => {
       const image = new Image();
       image.onload = () => {
-        const maximumSize = 900;
+        // Барои телефон/Firestore сурат бояд хурд бошад (мегабайт = хато).
+        const maximumSize = 480;
         const scale = Math.min(
           1,
           maximumSize / Math.max(image.width, image.height)
         );
         const canvas = document.createElement("canvas");
-        canvas.width = Math.round(image.width * scale);
-        canvas.height = Math.round(image.height * scale);
+        canvas.width = Math.max(1, Math.round(image.width * scale));
+        canvas.height = Math.max(1, Math.round(image.height * scale));
         canvas.getContext("2d").drawImage(
           image,
           0,
@@ -755,7 +806,7 @@ function readImage(file) {
           canvas.width,
           canvas.height
         );
-        resolve(canvas.toDataURL("image/jpeg", 0.82));
+        resolve(canvas.toDataURL("image/jpeg", 0.68));
       };
       image.onerror = reject;
       image.src = reader.result;
@@ -997,9 +1048,9 @@ $("#productForm").onsubmit = async event => {
   }
   if (cloudSave) {
     if (translated.translationPending) setCloudStatus("Маҳсулот нигоҳ дошта шуд. Тарҷума дастрас набуд; матн дар дигар забонҳо муваққатан тоҷикӣ аст ва аз форма тағйир дода мешавад.");
-    else setCloudStatus("Тағйирот дар сервер нигоҳ дошта шуд ва барои ҳамаи харидорон дастрас аст.");
+    else setCloudStatus("Тағйирот нигоҳ дошта шуд — дар телефон ҳам (саҳифаро нав кунед) мебарояд.");
   } else {
-    setCloudStatus("Маҳсулот дар ин компютер нигоҳ дошта шуд. Барои сайти интернетӣ бо Google-и админ пайваст шавед.");
+    setCloudStatus("Дар ҳамин компютер нигоҳ дошта шуд. Барои телефон: «Пайваст шудан бо Google»-ро пахш кунед.");
   }
 
   saveButton.disabled = false;

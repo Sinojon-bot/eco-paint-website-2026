@@ -75,11 +75,19 @@ html[dir="rtl"] body {
   }
 
   .search {
-    flex-basis: calc(100% - 175px);
+    flex-basis: 100%;
+    order: 3;
+    min-width: 100%;
     height: 42px;
   }
 
   .language-picker {
     margin-left: auto;
+    gap: 2px;
+    padding: 3px;
+  }
+
+  .cartBtn {
+    margin-left: 0;
   }
 }

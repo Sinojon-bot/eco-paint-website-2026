@@ -554,9 +554,9 @@ function upgradePlaceholderProduct(product) {
   const next = { ...product };
   const placeholderName = isPlaceholderProductName(product.name);
   const stubPrices = !product.variants?.length || isStubPricing(product.variants);
-  const uglyPoster = Number(product.id) === 1 &&
-    /sniezhka/i.test(String(product.image || ""));
 
+  // Танҳо номҳои INTERIOR/FACADE ва нархи stub-ро нав кун.
+  // Сурат/нарх/матни админро ҳеҷ гоҳ нест накун.
   if (placeholderName) {
     next.name = defaults.name;
     next.description = defaults.description;
@@ -567,42 +567,23 @@ function upgradePlaceholderProduct(product) {
   if (stubPrices) {
     next.variants = defaults.variants.map(variant => ({ ...variant }));
   }
-  if (uglyPoster) {
-    next.image = defaults.image;
-    next.colors = defaults.colors.slice();
-  }
   return normalizeProduct(next);
 }
 
-const PRODUCTS_STORAGE_KEY = "ecoPaintProductsAutoV3";
-
-function migrateSniezhkaCatalog(products) {
-  return products.map(product => {
-    if (Number(product.id) !== 1) return product;
-    const defaults = DEFAULT_PRODUCTS[0];
-    return normalizeProduct({
-      ...product,
-      name: defaults.name,
-      description: defaults.description,
-      category: defaults.category,
-      image: defaults.image,
-      variants: defaults.variants.map(variant => ({ ...variant })),
-      coverage: defaults.coverage,
-      colors: defaults.colors.slice()
-    });
-  });
-}
+const PRODUCTS_STORAGE_KEY = "ecoPaintProductsAutoV4";
 
 function loadProducts() {
   try {
-    const rawV3 = localStorage.getItem(PRODUCTS_STORAGE_KEY);
+    const rawV4 = localStorage.getItem(PRODUCTS_STORAGE_KEY);
+    const rawV3 = localStorage.getItem("ecoPaintProductsAutoV3");
     const rawV2 = localStorage.getItem("ecoPaintProductsAutoV2");
     const rawV1 = localStorage.getItem("ecoPaintProductsAutoV1");
-    const saved = JSON.parse(rawV3 || rawV2 || rawV1);
+    const saved = JSON.parse(rawV4 || rawV3 || rawV2 || rawV1);
     // Массиви холӣ ҳам натиҷаи дуруст аст: админ метавонад ҳамаи
     // маҳсулотро нест кунад. Дар ин ҳолат маҳсулоти пешфарзро барнагардон.
+    // Муҳим: маълумоти админро overwrite накун — танҳо ҳамонро нигоҳ дор.
     if (Array.isArray(saved)) {
-      let migrated = saved.map(item => {
+      const migrated = saved.map(item => {
         const product = upgradePlaceholderProduct(item);
         if (!product.variants.length) {
           const original = DEFAULT_PRODUCTS.find(
@@ -614,7 +595,6 @@ function loadProducts() {
         }
         return product;
       });
-      if (!rawV3) migrated = migrateSniezhkaCatalog(migrated);
       localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(migrated));
       return migrated;
     }
@@ -2124,7 +2104,11 @@ $("#quickRegister").onsubmit = async event => {
 };
 
 window.addEventListener("storage", event => {
-  if (event.key === PRODUCTS_STORAGE_KEY || event.key === "ecoPaintProductsAutoV1") {
+  if (
+    event.key === PRODUCTS_STORAGE_KEY ||
+    event.key === "ecoPaintProductsAutoV3" ||
+    event.key === "ecoPaintProductsAutoV1"
+  ) {
     products = loadProducts();
     pruneCart();
     renderCategories();

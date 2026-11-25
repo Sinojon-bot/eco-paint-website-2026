@@ -1022,15 +1022,15 @@ header {
 @keyframes welcome-word { to {opacity:1;transform:none} }
 
 @media (max-width:760px) {
-  .welcome-page { min-height:calc(100vh - 150px); padding:35px 3% 110px; }
+  .welcome-page { min-height:calc(100vh - 150px); padding:28px 3% 100px; overflow-x:hidden; }
   .welcome-page::before { inset:2% 1.5% 5%; border-radius:28px; }
-  .welcome-copy { margin:0 auto 15px; font-size:clamp(2.15rem,12vw,4rem); }
-  .welcome-buckets { height:310px; width:112%; margin-left:-6%; }
-  .welcome-bucket { width:29%; margin:0 -4%; }
-  .welcome-bucket img { height:235px; }
+  .welcome-copy { margin:0 auto 10px; font-size:clamp(1.85rem,10.5vw,3.4rem); max-width:96%; }
+  .welcome-buckets { height:260px; width:100%; margin-left:0; max-width:100%; }
+  .welcome-bucket { width:31%; margin:0 -3%; }
+  .welcome-bucket img { height:200px; }
   .welcome-bucket:nth-child(4) { display:none; }
   .welcome-lid { top:12%; border-width:3px; }
-  .welcome-catalog { margin:-12px auto 0; }
+  .welcome-catalog { margin:8px auto 0; min-height:48px; padding:0 22px; font-size:16px; }
 }
 
 /* Use the photographed lid itself; no drawn replacement lid. */
