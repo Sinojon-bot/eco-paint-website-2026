@@ -317,11 +317,13 @@ function escapeHTML(value) {
 
 function adminError(error) {
   const code = error?.code || "";
-  if (code.includes("permission-denied")) return "Сервер иҷозат надод. Бо Google-и админ ворид шавед; қоидаҳои Firestore бояд дастрасии админро ба products, settings ва customers иҷозат диҳанд. Тағйирот сабт нашуд.";
+  if (code.includes("permission-denied")) {
+    return "Сервер иҷозат надод. Файли OPEN-SYNC.txt-ро хонед: Firebase → Firestore → Rules-ро аз firestore.rules нав кунед ва Publish занед. Маълумоти шумо нест нашуд.";
+  }
   if (code.includes("popup-blocked")) return "Браузер равзанаи Google-ро баст. Равзанаҳои поп-апро барои ин сайт иҷозат диҳед ва «Пайваст шудан»-ро пахш кунед.";
   if (code.includes("popup-closed") || code.includes("cancelled-popup")) return "Воридшавӣ бекор шуд. Маълумот тағйир наёфт.";
   if (code.includes("unauthorized-domain")) {
-    return "Firebase ин суроғаро иҷозат намедиҳад. Firebase Console → Authentication → Settings → Authorized domains → «Add domain» → sinojon-bot.github.io-ро илова кунед, баъд саҳифаро нав кунед.";
+    return "Google ин суроғаро иҷозат намедиҳад. Бе Google ҳам фиристода мешавад: OPEN-SYNC.txt → Firestore Rules-ро Publish кунед, баъд «Нигоҳ доштан». Ё Authorized domains → sinojon-bot.github.io.";
   }
   if (code.includes("unavailable") || code.includes("network")) return "Сервер дастрас нест. Интернетро санҷед; тағйирот ҳанӯз сабт нашуд.";
   return error?.message || "Амал иҷро нашуд. Боз кӯшиш кунед.";
@@ -469,6 +471,8 @@ async function seedOrLoadCloudProducts() {
   }
 }
 
+const PUBLIC_SYNC_KEY = "EcoPaintTJ2026Sync";
+
 async function saveProductToCloud(product) {
   await ensureCloudAdmin();
   const ready = await prepareProductForCloud(product);
@@ -486,6 +490,7 @@ async function saveProductToCloud(product) {
   const { cloudId, ...data } = ready;
   await ecoPaintDb.collection("products").doc(cloudId || String(ready.id)).set({
     ...data,
+    syncKey: PUBLIC_SYNC_KEY,
     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
   }, { merge: true });
   Object.assign(product, ready);
@@ -496,11 +501,51 @@ async function initializeCatalog(items) {
   const batch = ecoPaintDb.batch();
   items.forEach(({ cloudId, ...item }) => batch.set(
     ecoPaintDb.collection("products").doc(cloudId || String(item.id)),
-    { ...item, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }
+    {
+      ...item,
+      syncKey: PUBLIC_SYNC_KEY,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }
   ));
-  batch.set(ecoPaintDb.collection("settings").doc("catalog"), { initialized: true });
+  batch.set(ecoPaintDb.collection("settings").doc("catalog"), {
+    initialized: true,
+    syncKey: PUBLIC_SYNC_KEY
+  });
   await batch.commit();
   cloudCatalogNeedsSeed = false;
+}
+
+// Бе Google ҳам: агар Firestore Rules аз OPEN-SYNC.txt гузошта шуда бошад,
+// тағйирот ба интернет меравад ва дар телефон дида мешавад.
+async function publishCatalogToInternet(list) {
+  if (!ecoPaintDb) {
+    throw new Error("Firebase бор нашуд. Саҳифаро нав кунед.");
+  }
+  const prepared = [];
+  for (const item of list) {
+    prepared.push(await prepareProductForCloud(item));
+  }
+  const batch = ecoPaintDb.batch();
+  prepared.forEach(item => {
+    const { cloudId, ...data } = item;
+    batch.set(
+      ecoPaintDb.collection("products").doc(cloudId || String(item.id)),
+      {
+        ...data,
+        syncKey: PUBLIC_SYNC_KEY,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      },
+      { merge: true }
+    );
+  });
+  batch.set(ecoPaintDb.collection("settings").doc("catalog"), {
+    initialized: true,
+    syncKey: PUBLIC_SYNC_KEY,
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+  }, { merge: true });
+  await batch.commit();
+  cloudCatalogNeedsSeed = false;
+  return prepared;
 }
 
 async function connectAdmin() {
@@ -1043,32 +1088,44 @@ $("#productForm").onsubmit = async event => {
   }
   const index = products.findIndex(item => item.id === id);
 
-  if (cloudSave) {
-    try {
-      saveButton.textContent = "Дар сервер нигоҳ дошта мешавад...";
-      await saveProductToCloud(product);
-    } catch (error) {
-      setCloudStatus(adminError(error), true);
-      alert(adminError(error));
-      saveButton.disabled = false;
-      saveButton.textContent = "Нигоҳ доштан ва тарҷума кардан";
-      return;
-    }
-  }
-
+  // Аввал ҳамеша дар компютер нигоҳ дор — чизҳои админ нест намешаванд.
   if (index >= 0) products[index] = product;
   else products.push(product);
   try { saveProducts(); }
   catch {
-    setCloudStatus(cloudSave
-      ? "Дар сервер нигоҳ дошта шуд. Хотираи браузер пур аст; саҳифаро нав кунед."
-      : "Хотираи браузер пур аст; сурати хурдтар интихоб кунед.", true);
+    setCloudStatus("Хотираи браузер пур аст; сурати хурдтар интихоб кунед.", true);
+    saveButton.disabled = false;
+    saveButton.textContent = "Нигоҳ доштан ва тарҷума кардан";
+    return;
   }
+
+  let published = false;
   if (cloudSave) {
-    if (translated.translationPending) setCloudStatus("Маҳсулот нигоҳ дошта шуд. Тарҷума дастрас набуд; матн дар дигар забонҳо муваққатан тоҷикӣ аст ва аз форма тағйир дода мешавад.");
-    else setCloudStatus("Тағйирот нигоҳ дошта шуд — дар телефон ҳам (саҳифаро нав кунед) мебарояд.");
-  } else {
-    setCloudStatus("Дар ҳамин компютер нигоҳ дошта шуд. Барои телефон: «Пайваст шудан бо Google»-ро пахш кунед.");
+    try {
+      saveButton.textContent = "Дар сервер нигоҳ дошта мешавад...";
+      await saveProductToCloud(product);
+      published = true;
+    } catch (error) {
+      console.error(error);
+    }
+  }
+  if (!published && ecoPaintDb) {
+    try {
+      saveButton.textContent = "Ба интернет фиристода мешавад...";
+      const prepared = await publishCatalogToInternet(products);
+      products = prepared;
+      saveProducts();
+      published = true;
+    } catch (error) {
+      setCloudStatus(adminError(error), true);
+      // Маълумоти маҳаллӣ монд — танҳо интернет қатъ шуд.
+    }
+  }
+
+  if (published) {
+    setCloudStatus("Ба интернет рафт · дар телефон саҳифаро нав кунед. Маълумоти админ нигоҳ дошта шуд.");
+  } else if (!ecoPaintDb) {
+    setCloudStatus("Дар компютер нигоҳ дошта шуд. Firebase бор нашуд — саҳифаро нав кунед ва боз «Нигоҳ доштан».", true);
   }
 
   saveButton.disabled = false;

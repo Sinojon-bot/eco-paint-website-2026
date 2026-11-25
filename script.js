@@ -661,20 +661,45 @@ function pruneCart() {
   }
 }
 
+function applyRemoteProducts(list) {
+  if (!Array.isArray(list) || !list.length) return false;
+  products = list
+    .map(item => upgradePlaceholderProduct(item))
+    .sort((a, b) => a.id - b.id);
+  localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(products));
+  pruneCart();
+  renderCategories();
+  renderProducts();
+  renderWelcomeBuckets();
+  return true;
+}
+
+async function loadCatalogJsonFallback() {
+  try {
+    const response = await fetch(`data/catalog.json?_=${Date.now()}`, { cache: "no-store" });
+    if (!response.ok) return;
+    const payload = await response.json();
+    const list = Array.isArray(payload) ? payload : payload?.products;
+    applyRemoteProducts(list);
+  } catch (error) {
+    console.warn("catalog.json unavailable", error);
+  }
+}
+
 function startCloudCatalog() {
-  if (!ecoPaintDb || !/^https?:$/.test(location.protocol)) return;
+  if (!/^https?:$/.test(location.protocol)) return;
+  loadCatalogJsonFallback();
+  if (!ecoPaintDb) return;
   let latestSnapshot = null;
   let initialized = false;
   function refreshCatalog() {
     if (!latestSnapshot || (latestSnapshot.empty && !initialized)) return;
-    products = latestSnapshot.docs
-      .map(document => upgradePlaceholderProduct(document.data()))
-      .sort((a, b) => a.id - b.id);
-    localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(products));
-    pruneCart();
-    renderCategories();
-    renderProducts();
-    renderWelcomeBuckets();
+    const list = latestSnapshot.docs.map(document => {
+      const data = document.data() || {};
+      delete data.syncKey;
+      return data;
+    });
+    applyRemoteProducts(list);
   }
   ecoPaintDb.collection("products").onSnapshot(snapshot => {
     latestSnapshot = snapshot;
@@ -688,7 +713,9 @@ function startCloudCatalog() {
 
   ecoPaintDb.collection("settings").doc("payment").onSnapshot(document => {
     if (!document.exists) return;
-    localStorage.setItem("ecoPaintPaymentSettings", JSON.stringify(document.data()));
+    const data = { ...document.data() };
+    delete data.syncKey;
+    localStorage.setItem("ecoPaintPaymentSettings", JSON.stringify(data));
   }, error => console.error("Cloud settings failed", error));
 }
 

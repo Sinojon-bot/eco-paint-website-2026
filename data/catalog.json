@@ -1,0 +1,274 @@
+{
+  "updatedAt": "2026-11-25T18:05:18.988Z",
+  "products": [
+    {
+      "id": 1,
+      "name": {
+        "tg": "СНЕЖКА",
+        "ru": "СНЕЖКА",
+        "en": "SNEZHKA",
+        "zh": "СНЕЖКА 超白漆",
+        "fa": "СНЕЖКА"
+      },
+      "description": {
+        "tg": "Эмулсияи акрилии суперсафед Eco Paint СНЕЖКА барои девор ва шифт. Барои корҳои дарунӣ ва берунӣ.",
+        "ru": "Супербелая акриловая водоэмульсия Eco Paint СНЕЖКА для стен и потолков. Для внутренних и наружных работ.",
+        "en": "Eco Paint SNEZHKA super-white acrylic emulsion for walls and ceilings. Interior and exterior.",
+        "zh": "Eco Paint СНЕЖКА 超白丙烯酸乳胶漆，适用于墙面与天花板，室内外皆可。",
+        "fa": "امولسیون اکریلیک فوق‌سفید Eco Paint СНЕЖКА برای دیوار و سقف. برای کار داخلی و خارجی."
+      },
+      "category": {
+        "tg": "Эмулсия",
+        "ru": "Эмульсия",
+        "en": "Emulsion",
+        "zh": "乳胶漆",
+        "fa": "امولسیون"
+      },
+      "image": "images/interior.webp",
+      "variants": [
+        {
+          "weight": 10,
+          "price": 75
+        },
+        {
+          "weight": 20,
+          "price": 140
+        }
+      ],
+      "coverage": 9,
+      "colors": [
+        "#f7f4ef",
+        "#e8dfd0",
+        "#d5c4a8",
+        "#c9d9bd"
+      ]
+    },
+    {
+      "id": 2,
+      "name": {
+        "tg": "Eco Facade",
+        "ru": "Eco Facade",
+        "en": "Eco Facade",
+        "zh": "Eco Facade 外墙漆",
+        "fa": "Eco Facade"
+      },
+      "description": {
+        "tg": "Ранги фасадӣ барои беруни хона. Ба борон, офтоб ва гармӣ тобовар.",
+        "ru": "Фасадная краска для наружных работ. Устойчива к дождю, солнцу и жаре.",
+        "en": "Exterior facade paint. Weather-resistant against rain, sun and heat.",
+        "zh": "外墙涂料，耐雨、耐晒、耐热。",
+        "fa": "رنگ نما برای فضای بیرونی. مقاوم در برابر باران، آفتاب و گرما."
+      },
+      "category": {
+        "tg": "Эмулсия",
+        "ru": "Эмульсия",
+        "en": "Emulsion",
+        "zh": "乳胶漆",
+        "fa": "امولسیون"
+      },
+      "image": "images/facade.webp",
+      "variants": [
+        {
+          "weight": 4,
+          "price": 58
+        },
+        {
+          "weight": 10,
+          "price": 118
+        },
+        {
+          "weight": 20,
+          "price": 215
+        }
+      ],
+      "coverage": 7,
+      "colors": [
+        "#f2efe8",
+        "#d8c8a8",
+        "#a8b59a",
+        "#7d8fa3"
+      ]
+    },
+    {
+      "id": 3,
+      "name": {
+        "tg": "Eco Decorative",
+        "ru": "Eco Decorative",
+        "en": "Eco Decorative",
+        "zh": "Eco Decorative 装饰漆",
+        "fa": "Eco Decorative"
+      },
+      "description": {
+        "tg": "Пӯшиши декоративӣ бо фактураи зебо барои ҳуҷраҳои меҳмонӣ ва хобгоҳ.",
+        "ru": "Декоративное покрытие с красивой фактурой для гостиных и спален.",
+        "en": "Decorative textured finish for living rooms and bedrooms.",
+        "zh": "装饰纹理涂料，适合客厅与卧室。",
+        "fa": "پوشش تزئینی با بافت زیبا برای پذیرایی و اتاق خواب."
+      },
+      "category": {
+        "tg": "Декоративӣ",
+        "ru": "Декоративные",
+        "en": "Decorative",
+        "zh": "装饰涂料",
+        "fa": "تزئینی"
+      },
+      "image": "images/decorative.webp",
+      "variants": [
+        {
+          "weight": 4,
+          "price": 85
+        },
+        {
+          "weight": 10,
+          "price": 175
+        },
+        {
+          "weight": 20,
+          "price": 310
+        }
+      ],
+      "coverage": 5,
+      "colors": [
+        "#efe6d8",
+        "#c9b29a",
+        "#9caf88",
+        "#76556f"
+      ]
+    },
+    {
+      "id": 4,
+      "name": {
+        "tg": "Eco Primer",
+        "ru": "Eco Primer",
+        "en": "Eco Primer",
+        "zh": "Eco Primer 底漆",
+        "fa": "Eco Primer"
+      },
+      "description": {
+        "tg": "Грунтовкаи акрилӣ барои омода кардани девор пеш аз рангкунӣ.",
+        "ru": "Акриловая грунтовка для подготовки стен перед покраской.",
+        "en": "Acrylic primer to prepare walls before painting.",
+        "zh": "丙烯酸底漆，涂装前打底用。",
+        "fa": "آستر اکریلیک برای آماده‌سازی دیوار قبل از رنگ‌کاری."
+      },
+      "category": {
+        "tg": "Грунтовка",
+        "ru": "Грунтовка",
+        "en": "Primer",
+        "zh": "底漆",
+        "fa": "آستر"
+      },
+      "image": "images/primer.webp",
+      "variants": [
+        {
+          "weight": 4,
+          "price": 38
+        },
+        {
+          "weight": 10,
+          "price": 78
+        },
+        {
+          "weight": 20,
+          "price": 135
+        }
+      ],
+      "coverage": 12,
+      "colors": [
+        "#ffffff",
+        "#f3f1ec",
+        "#e6e2d8"
+      ]
+    },
+    {
+      "id": 5,
+      "name": {
+        "tg": "Eco PVA",
+        "ru": "Eco PVA",
+        "en": "Eco PVA",
+        "zh": "Eco PVA 胶水",
+        "fa": "Eco PVA"
+      },
+      "description": {
+        "tg": "Клейи универсалии ПВА барои чӯб, коғаз ва корҳои сохтмонӣ.",
+        "ru": "Универсальный клей ПВА для дерева, бумаги и строительных работ.",
+        "en": "Universal PVA adhesive for wood, paper and construction jobs.",
+        "zh": "通用 PVA 胶，适用于木材、纸张与施工。",
+        "fa": "چسب همه‌کاره PVA برای چوب، کاغذ و کارهای ساختمانی."
+      },
+      "category": {
+        "tg": "Клей ПВА",
+        "ru": "Клей ПВА",
+        "en": "PVA glue",
+        "zh": "PVA 胶",
+        "fa": "چسب PVA"
+      },
+      "image": "images/pva.webp",
+      "variants": [
+        {
+          "weight": 4,
+          "price": 42
+        },
+        {
+          "weight": 10,
+          "price": 88
+        },
+        {
+          "weight": 20,
+          "price": 155
+        }
+      ],
+      "coverage": 8,
+      "colors": [
+        "#ffffff",
+        "#f7f7f5"
+      ]
+    },
+    {
+      "id": 6,
+      "name": {
+        "tg": "Eco Professional",
+        "ru": "Eco Professional",
+        "en": "Eco Professional",
+        "zh": "Eco Professional 专业漆",
+        "fa": "Eco Professional"
+      },
+      "description": {
+        "tg": "Серияи касбӣ бо тобоварии баланд барои устоҳо ва корҳои калон.",
+        "ru": "Профессиональная серия повышенной стойкости для мастеров и крупных работ.",
+        "en": "Professional high-durability range for trades and large jobs.",
+        "zh": "专业高耐久系列，适合工匠与大型工程。",
+        "fa": "سری حرفه‌ای با دوام بالا برای استادکاران و پروژه‌های بزرگ."
+      },
+      "category": {
+        "tg": "Касбӣ",
+        "ru": "Профессиональные",
+        "en": "Professional",
+        "zh": "专业系列",
+        "fa": "حرفه‌ای"
+      },
+      "image": "images/professional.webp",
+      "variants": [
+        {
+          "weight": 4,
+          "price": 72
+        },
+        {
+          "weight": 10,
+          "price": 148
+        },
+        {
+          "weight": 20,
+          "price": 265
+        }
+      ],
+      "coverage": 8,
+      "colors": [
+        "#f5f2eb",
+        "#e0d4c2",
+        "#88aacc",
+        "#557a58"
+      ]
+    }
+  ]
+}
