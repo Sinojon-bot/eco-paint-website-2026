@@ -320,7 +320,9 @@ function adminError(error) {
   if (code.includes("permission-denied")) return "Сервер иҷозат надод. Бо Google-и админ ворид шавед; қоидаҳои Firestore бояд дастрасии админро ба products, settings ва customers иҷозат диҳанд. Тағйирот сабт нашуд.";
   if (code.includes("popup-blocked")) return "Браузер равзанаи Google-ро баст. Равзанаҳои поп-апро барои ин сайт иҷозат диҳед ва «Пайваст шудан»-ро пахш кунед.";
   if (code.includes("popup-closed") || code.includes("cancelled-popup")) return "Воридшавӣ бекор шуд. Маълумот тағйир наёфт.";
-  if (code.includes("unauthorized-domain")) return "Ин суроға барои Google иҷозат надорад. Админро аз пайванди интернетии сайт кушоед.";
+  if (code.includes("unauthorized-domain")) {
+    return "Firebase ин суроғаро иҷозат намедиҳад. Firebase Console → Authentication → Settings → Authorized domains → «Add domain» → sinojon-bot.github.io-ро илова кунед, баъд саҳифаро нав кунед.";
+  }
   if (code.includes("unavailable") || code.includes("network")) return "Сервер дастрас нест. Интернетро санҷед; тағйирот ҳанӯз сабт нашуд.";
   return error?.message || "Амал иҷро нашуд. Боз кӯшиш кунед.";
 }
