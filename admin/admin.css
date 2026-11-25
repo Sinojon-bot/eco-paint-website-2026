@@ -143,8 +143,17 @@ button {
   color:var(--red)
 }
 
-.login-card #loginGoogle { width:100%; margin-top:12px; }
+.login-card #loginGoogle,
+.login-card #quickLocalLogin { width:100%; margin-top:12px; }
 .login-help,.online-admin { font-size:14px; line-height:1.6; }
+.login-help code {
+  display:inline-block;
+  padding:1px 6px;
+  border-radius:6px;
+  background:#e8f5ec;
+  color:var(--green);
+  font-weight:700
+}
 .online-admin { color:var(--green); }
 .cloud-connection { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; margin-bottom:22px; padding:16px; border:1px solid var(--line); border-radius:16px; background:white; }
 .cloud-connection p { margin:0; flex:1 1 280px; font-size:14px; line-height:1.6; overflow-wrap:anywhere; }

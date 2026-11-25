@@ -765,19 +765,46 @@ function readImage(file) {
   });
 }
 
-$("#loginForm").onsubmit = event => {
-  event.preventDefault();
-  const correctLogin = $("#username").value === "admin" &&
-    $("#password").value === "12345";
+function normalizeLoginValue(value) {
+  return String(value || "")
+    .trim()
+    .replace(/\u200e|\u200f|\u00a0/g, "")
+    .toLowerCase();
+}
+
+function tryLocalAdminLogin(fromQuickButton = false) {
+  const username = normalizeLoginValue($("#username").value);
+  const password = String($("#password").value || "")
+    .trim()
+    .replace(/\u200e|\u200f|\u00a0/g, "");
+  const correctLogin = username === "admin" && password === "12345";
 
   if (correctLogin) {
+    $("#loginError").textContent = "";
     $("#loginView").classList.add("hidden");
     $("#adminView").classList.remove("hidden");
     sessionStorage.setItem("ecoPaintAdmin", "yes");
     renderProducts();
-  } else {
-    $("#loginError").textContent = "Ном ё рамз нодуруст аст!";
+    setCloudStatus("Ворид шудед (маҳаллӣ). Барои сайти интернетӣ «Пайваст шудан бо Google»-ро пахш кунед.");
+    showToast("Админ кушода шуд");
+    return true;
   }
+
+  $("#loginError").textContent = fromQuickButton
+    ? "Ворид нашуд. Саҳифаро нав кунед (Ctrl+F5) ва боз кӯшиш кунед."
+    : "Ном ё рамз нодуруст аст! Англисӣ нависед: admin / 12345";
+  return false;
+}
+
+$("#loginForm").onsubmit = event => {
+  event.preventDefault();
+  tryLocalAdminLogin(false);
+};
+
+$("#quickLocalLogin").onclick = () => {
+  $("#username").value = "admin";
+  $("#password").value = "12345";
+  tryLocalAdminLogin(true);
 };
 
 const TRANSLATION_LANGUAGE = {

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Eco Paint — Админ</title>
-  <link rel="stylesheet" href="admin.css">
+  <link rel="stylesheet" href="admin.css?v=8">
   <link rel="stylesheet" href="admin-language.css">
 </head>
 <body>
@@ -12,12 +12,20 @@
     <form id="loginForm" class="login-card">
       <div class="brand">Eco<b>paint</b></div>
       <h1>Воридшавии админ</h1>
-      <label>Номи корбар<input id="username" required></label>
-      <label>Рамз<input id="password" type="password" required></label>
+      <label>Номи корбар
+        <input id="username" name="username" autocomplete="username" autocapitalize="off" spellcheck="false" required placeholder="admin" value="admin">
+      </label>
+      <label>Рамз
+        <input id="password" name="password" type="password" autocomplete="current-password" inputmode="numeric" required placeholder="12345" value="12345">
+      </label>
       <p id="loginError" class="error"></p>
-      <button class="primary">Ворид шудан</button>
+      <button class="primary" type="submit" id="loginSubmit">Ворид шудан</button>
+      <button id="quickLocalLogin" class="secondary" type="button">Ворид бо admin / 12345</button>
       <button id="loginGoogle" class="secondary" type="button">Ворид шудан бо Google-и админ</button>
-      <p id="loginHelp" class="login-help">Барои тағйири сайт дар интернет бо Google-и админ ворид шавед (сурат/нарх аз админ ба сайт меравад). Маҳаллӣ: admin / 12345 — танҳо дар ҳамин компютер.</p>
+      <p id="loginHelp" class="login-help">
+        <b>Рамз:</b> ном <code>admin</code> · рамз <code>12345</code> (англисӣ нависед).<br>
+        Барои тағйири сайти интернетӣ баъд «Пайваст шудан бо Google»-ро пахш кунед.
+      </p>
       <a class="online-admin" href="https://sinojon-bot.github.io/eco-paint-website-2026/admin/">Кушодани админ дар интернет (Chrome) ↗</a>
       <a class="online-admin" href="https://sinojon-bot.github.io/eco-paint-website-2026/">Кушодани сайт дар интернет ↗</a>
     </form>
@@ -196,6 +204,6 @@
   <script src="https://cdn.jsdelivr.net/npm/firebase@10.14.1/firebase-auth-compat.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/firebase@10.14.1/firebase-firestore-compat.js"></script>
   <script src="../firebase-config.js"></script>
-  <script src="admin.js"></script>
+  <script src="admin.js?v=8"></script>
 </body>
 </html>
