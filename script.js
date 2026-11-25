@@ -1125,7 +1125,7 @@ function paymentSettings() {
       cardHolder: "",
       whatsapp: "992554900600",
       depositPercent: 15,
-      receiptCheckEnabled: true,
+      receiptCheckEnabled: false,
       receiptBrandWords: ["dushanbe", "душанбе", "dc next", "dc wallet", "001022011"],
       receiptSuccessWords: ["успеш", "оплачен", "выполнен", "success", "successful", "мувафф"],
       ...JSON.parse(localStorage.getItem("ecoPaintPaymentSettings") || "{}")
@@ -1138,7 +1138,7 @@ function paymentSettings() {
       cardHolder: "",
       whatsapp: "992554900600",
       depositPercent: 15,
-      receiptCheckEnabled: true,
+      receiptCheckEnabled: false,
       receiptBrandWords: ["dushanbe", "душанбе", "dc next", "dc wallet", "001022011"],
       receiptSuccessWords: ["успеш", "оплачен", "выполнен", "success", "successful", "мувафф"]
     };
@@ -1367,14 +1367,12 @@ $("#sheetContent").addEventListener("change", async event => {
         expectedAmount
       );
 
+      // MVP: OCR is advisory — never soft-lock checkout if a receipt file is attached.
       if (!correctReceipt) {
-        event.target.value = "";
-        preview.src = "";
-        preview.classList.add("hidden");
         status.className = "receipt-status rejected";
-        status.textContent = tr("receiptRejected");
-        sendButton.disabled = true;
-        sendButton.textContent = tr("receipt");
+        status.textContent = tr("receiptRejected") + " — " + tr("attachReceipt");
+        sendButton.disabled = false;
+        sendButton.textContent = tr("send");
         return;
       }
 
@@ -1384,13 +1382,10 @@ $("#sheetContent").addEventListener("change", async event => {
       sendButton.textContent = tr("send");
     } catch (error) {
       console.error(error);
-      event.target.value = "";
-      preview.src = "";
-      preview.classList.add("hidden");
       status.className = "receipt-status rejected";
-      status.textContent = tr("receiptError");
-      sendButton.disabled = true;
-      sendButton.textContent = tr("receipt");
+      status.textContent = tr("receiptError") + " — " + tr("attachReceipt");
+      sendButton.disabled = false;
+      sendButton.textContent = tr("send");
     }
   }
 });
@@ -1454,13 +1449,15 @@ $("#sheetContent").addEventListener("submit", event => {
   const whatsappUrl = `https://wa.me/${String(settings.whatsapp).replace(/\D/g, "")}?text=` +
     encodeURIComponent(message);
   // Агар браузер равзанаи навро манъ кунад, фармоиш набояд гум шавад.
-  if (!window.open(whatsappUrl, "_blank")) {
-    location.href = whatsappUrl;
-  }
+  const popup = window.open(whatsappUrl, "_blank");
+  if (!popup) location.href = whatsappUrl;
   rememberCustomerOrder(phone);
-  cart = [];
-  saveCart();
-  updateBadge();
+  // Сабадро танҳо пас аз тасдиқ холӣ кун — агар WhatsApp баста шавад, харид гум нашавад.
+  if (confirm("WhatsApp ✓\nOK — сабад холӣ")) {
+    cart = [];
+    saveCart();
+    updateBadge();
+  }
   $("#overlay").classList.add("hidden");
 });
 
@@ -2059,6 +2056,15 @@ document.addEventListener("keydown", event => {
   $("#authOverlay").classList.add("hidden");
 });
 
+function restartWelcomeMotion() {
+  document.querySelectorAll(".welcome-copy span, .welcome-copy strong").forEach(node => {
+    node.style.animation = "none";
+    void node.offsetWidth;
+    node.style.animation = "";
+  });
+  renderWelcomeBuckets();
+}
+
 function showPage(page) {
   $("#welcomePage").classList.toggle("hidden", page !== "home");
   $("#catalogPage").classList.toggle("hidden", page !== "catalog");
@@ -2066,6 +2072,7 @@ function showPage(page) {
   $("#homeBtn").classList.toggle("active", page === "home");
   $("#catalogBtn").classList.toggle("active", page === "catalog");
   $("#contactBtn").classList.toggle("active", page === "contact");
+  if (page === "home") restartWelcomeMotion();
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 

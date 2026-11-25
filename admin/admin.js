@@ -306,7 +306,7 @@ function loadPaymentSettings(remoteSettings) {
   $("#merchantName").value = settings.cardHolder || "";
   $("#merchantWhatsApp").value = settings.whatsapp || "992554900600";
   $("#firstOrderDeposit").value = settings.depositPercent || 15;
-  $("#receiptCheckEnabled").checked = settings.receiptCheckEnabled !== false;
+  $("#receiptCheckEnabled").checked = settings.receiptCheckEnabled === true;
   $("#receiptBrandWords").value = (settings.receiptBrandWords || [
     "dushanbe", "душанбе", "dc next", "dc wallet", "001022011"
   ]).join(", ");
