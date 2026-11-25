@@ -2,17 +2,14 @@
   const FIREBASE_SETS = [
     [
       "https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js",
-      "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js",
       "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"
     ],
     [
       "https://cdn.jsdelivr.net/npm/firebase@10.14.1/firebase-app-compat.js",
-      "https://cdn.jsdelivr.net/npm/firebase@10.14.1/firebase-auth-compat.js",
       "https://cdn.jsdelivr.net/npm/firebase@10.14.1/firebase-firestore-compat.js"
     ],
     [
       "https://unpkg.com/firebase@10.14.1/firebase-app-compat.js",
-      "https://unpkg.com/firebase@10.14.1/firebase-auth-compat.js",
       "https://unpkg.com/firebase@10.14.1/firebase-firestore-compat.js"
     ]
   ];
@@ -55,7 +52,7 @@
     }
 
     await loadScript("../firebase-config.js");
-    await loadScript("admin.js?v=12");
+    await loadScript("admin.js?v=13");
 
     window.ecoPaintFirebaseReady = true;
     window.dispatchEvent(new CustomEvent("ecoPaintFirebaseReady", {

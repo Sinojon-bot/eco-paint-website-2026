@@ -477,7 +477,7 @@ async function initializeCatalog(items) {
   cloudCatalogNeedsSeed = false;
 }
 
-// Бе Google: агар Firestore Rules аз OPEN-SYNC.txt гузошта шуда бошад,
+// Агар Firestore Rules аз OPEN-SYNC.txt гузошта шуда бошад,
 // тағйирот ба интернет меравад ва дар телефон дида мешавад.
 async function publishCatalogToInternet(list) {
   if (!ecoPaintDb) {

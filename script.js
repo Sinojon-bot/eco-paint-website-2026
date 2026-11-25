@@ -1828,7 +1828,6 @@ document.querySelectorAll("[data-lang]").forEach(button => {
 $("#search").oninput = renderProducts;
 
 let selectedAvatar = "👤";
-let signedInUser = null;
 let pendingAuthAction = null;
 
 const AUTH_TEXT = {
@@ -1865,14 +1864,6 @@ function showAuth(error = "") {
   $("#authError").textContent = error;
   $("#authError").classList.toggle("hidden", !error);
   $("#authOverlay").classList.remove("hidden");
-}
-
-async function saveCustomerToFirebase() {
-  return false;
-}
-
-async function loadSignedInUser() {
-  signedInUser = null;
 }
 
 function showProfileAvatar(avatar) {
@@ -1919,7 +1910,6 @@ function closeProfileEditor() {
 
 $("#editProfile").onclick = openProfileEditor;
 $("#profileLogout").onclick = () => {
-  signedInUser = null;
   selectedAvatar = "👤";
   localStorage.removeItem("ecoPaintCustomerProfile");
   renderProfile({});
@@ -1965,25 +1955,20 @@ $("#profileImage").onchange = event => {
   reader.readAsDataURL(file);
 };
 
-$("#profileForm").onsubmit = async event => {
+$("#profileForm").onsubmit = event => {
   event.preventDefault();
   const old = savedCustomerProfile();
   const profile = {
     name: $("#profileName").value.trim(),
     phone: $("#profilePhone").value.trim(),
     city: $("#profileCity").value.trim(),
-    email: old.email || signedInUser?.email || "",
+    email: old.email || "",
     avatar: selectedAvatar
   };
   localStorage.setItem("ecoPaintCustomerProfile", JSON.stringify(profile));
   renderProfile(profile);
   $("#profileMessage").textContent = tr("profileSaved");
   closeProfileEditor();
-  try {
-    await saveCustomerToFirebase(profile);
-  } catch (error) {
-    console.error("Firebase profile save failed", error);
-  }
 };
 $("#calculatorBtn").onclick = showCalculator;
 $("#visualizerBtn").onclick = () => showWallStudio();
@@ -2036,15 +2021,15 @@ $("#authOverlay").onclick = event => {
   if (event.target.id === "authOverlay") event.currentTarget.classList.add("hidden");
 };
 
-$("#quickRegister").onsubmit = async event => {
+$("#quickRegister").onsubmit = event => {
   event.preventDefault();
   const old = savedCustomerProfile();
   const profile = {
     name: $("#authName").value.trim(),
     phone: $("#authPhone").value.trim(),
     city: $("#authCity").value.trim(),
-    email: signedInUser?.email || old.email || "",
-    avatar: signedInUser?.picture || old.avatar || "👤"
+    email: old.email || "",
+    avatar: old.avatar || "👤"
   };
   if (profile.phone.replace(/\D/g, "").length < 9) {
     $("#authError").textContent = "Рақами телефонро пурра нависед (масалан, 992 55 490 06 00).";
@@ -2053,13 +2038,6 @@ $("#quickRegister").onsubmit = async event => {
     return;
   }
   localStorage.setItem("ecoPaintCustomerProfile", JSON.stringify(profile));
-  try {
-    await saveCustomerToFirebase(profile);
-  } catch (error) {
-    console.error("Firebase customer save failed", error);
-    $("#authError").textContent = "Маълумот дар телефон нигоҳ дошта шуд, аммо ба база нарафт.";
-    $("#authError").classList.remove("hidden");
-  }
   renderProfile(profile);
   $("#authOverlay").classList.add("hidden");
   const action = pendingAuthAction;
@@ -2088,7 +2066,6 @@ async function startSite() {
   updateBadge();
   loadProfile();
   startCloudCatalog();
-  await loadSignedInUser();
 
   try {
     await translateOldProducts(language);

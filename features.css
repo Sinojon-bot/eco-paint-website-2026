@@ -16,9 +16,6 @@
 .auth-mark { width:52px; height:52px; display:grid; place-items:center; color:#fff; background:linear-gradient(145deg,#0a9345,#075f2c); border-radius:17px; font-size:26px; font-weight:900; box-shadow:0 9px 22px #087b3935; }
 .auth-dialog h2 { margin:0 0 8px; font-size:27px; color:#17261d; }
 .auth-dialog>p { margin:0 0 23px; color:#68736c; }
-.google-login { width:100%; min-height:52px; padding:0 18px; display:flex; align-items:center; justify-content:center; gap:12px; color:#263029; background:#fff; border:1px solid #ccd4ce; border-radius:13px; box-shadow:0 2px 7px #10241812; font:inherit; font-weight:800; cursor:pointer; }
-.google-login:hover { background:#f8faf8; border-color:#aebbb2; }
-.google-login svg { width:22px; height:22px; flex:none; }
 .auth-divider { display:flex; align-items:center; gap:12px; margin:19px 0 15px; color:#87928b; font-size:13px; }
 .auth-divider::before,.auth-divider::after { content:""; flex:1; height:1px; background:#dce5df; }
 .quick-register { display:grid; gap:12px; text-align:left; }

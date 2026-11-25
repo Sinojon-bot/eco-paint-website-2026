@@ -143,7 +143,6 @@ button {
   color:var(--red)
 }
 
-.login-card #loginGoogle,
 .login-card #quickLocalLogin { width:100%; margin-top:12px; }
 .login-help,.online-admin { font-size:14px; line-height:1.6; }
 .login-help code {
