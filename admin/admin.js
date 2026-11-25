@@ -343,7 +343,9 @@ function isCloudAdmin(user) {
 
 function requireCloud() {
   if (!/^https?:$/.test(location.protocol)) throw new Error("Админ аз файл кушода шудааст. OPEN-ADMIN.cmd-ро истифода баред ё «Кушодани админ дар интернет»-ро пахш кунед.");
-  if (!ecoPaintAuth || !ecoPaintDb) throw new Error("Google бор нашуд. Интернетро санҷед ва саҳифаро нав кунед.");
+  if (!ecoPaintAuth || !ecoPaintDb) {
+    throw new Error("Google/Firebase бор нашуд. Саҳифаро нав кунед (Ctrl+F5). Админи маҳаллӣ кор мекунад; барои телефон боз Google-ро пахш кунед.");
+  }
 }
 
 async function ensureCloudAdmin() {
@@ -587,8 +589,22 @@ $("#adminGoogleLogin").onclick = connectAdmin;
 $("#connectAdmin").onclick = connectAdmin;
 $("#loginGoogle").onclick = connectAdmin;
 $("#refreshAdmin").onclick = async () => {
-  try { await seedOrLoadCloudProducts(); await loadCustomers(); }
-  catch (error) { setCloudStatus(adminError(error), true); }
+  try {
+    if (isCloudAdmin(ecoPaintAuth?.currentUser)) {
+      await seedOrLoadCloudProducts();
+      await loadCustomers();
+      return;
+    }
+    products = loadProducts();
+    renderProducts();
+    setCloudStatus(
+      ecoPaintAuth
+        ? "Маълумоти маҳаллӣ нав шуд. Барои телефон «Пайваст шудан бо Google»-ро пахш кунед."
+        : "Маълумоти маҳаллӣ нав шуд. Google ҳоло бор нашудааст — саҳифаро нав кунед ва боз кӯшиш кунед."
+    );
+  } catch (error) {
+    setCloudStatus(adminError(error), true);
+  }
 };
 
 function createLanguageFields() {
@@ -1148,14 +1164,35 @@ $("#logout").onclick = async () => {
 createLanguageFields();
 loadPaymentSettings();
 
+(function consumeLoginQuery() {
+  try {
+    const params = new URLSearchParams(location.search);
+    const user = normalizeLoginValue(params.get("username") || "");
+    const pass = String(params.get("password") || "").trim();
+    if (user || pass) {
+      history.replaceState(null, "", location.pathname);
+      if (user === "admin" && pass === "12345") {
+        $("#username").value = "admin";
+        $("#password").value = "12345";
+        tryLocalAdminLogin(true);
+      }
+    }
+  } catch (error) {
+    console.error(error);
+  }
+})();
+
 if (sessionStorage.getItem("ecoPaintAdmin") === "yes") {
   $("#loginView").classList.add("hidden");
   $("#adminView").classList.remove("hidden");
   renderProducts();
+  if (!isCloudAdmin(ecoPaintAuth?.currentUser)) {
+    setCloudStatus("Админ кушода аст. Барои телефон «Пайваст шудан бо Google»-ро пахш кунед.");
+  }
 }
 
 if (location.protocol === "file:") {
-  const message = "Ин нусха аз файл кушода шудааст. Барои Google ва харидорон OPEN-ADMIN.cmd-ро кушоед ё аз пайванди админи интернетӣ истифода баред.";
+  const message = "Ин нусха аз файл кушода шудааст. OPEN-ADMIN.cmd ё админи интернетиро кушоед.";
   $("#loginHelp").textContent = message;
   setCloudStatus(message, true);
 } else if (ecoPaintAuth) {
@@ -1165,4 +1202,6 @@ if (location.protocol === "file:") {
     try { await seedOrLoadCloudProducts(); }
     catch (error) { setCloudStatus(adminError(error), true); }
   });
+} else {
+  setCloudStatus("Google ҳоло омода нест. Админи маҳаллӣ кор мекунад — саҳифаро нав кунед ва боз «Пайваст шудан бо Google»-ро пахш кунед.", true);
 }

@@ -17,6 +17,7 @@ if (typeof firebase !== "undefined") {
 }
 
 async function finishServerGoogleLogin() {
+  if (!ecoPaintAuth) return null;
   const params = new URLSearchParams(location.hash.slice(1));
   const idToken = params.get("google_id_token");
   if (!idToken) return ecoPaintAuth.currentUser;
@@ -36,15 +37,25 @@ async function startServerGoogleLogin(returnPath) {
   if (!/^https?:$/.test(location.protocol)) {
     throw new Error("Барои Google сайтро аз интернет ё бо OPEN-SITE.cmd кушоед. Файли HTML мустақиман воридшавиро дастгирӣ намекунад.");
   }
-  if (!ecoPaintAuth) throw new Error("Google бор нашуд. Пайвасти интернетро санҷед ва саҳифаро нав кунед.");
+  if (!ecoPaintAuth) {
+    throw new Error("Google/Firebase бор нашуд. Саҳифаро нав кунед. Агар боз хато шавад, Wi‑Fi/интернетро иваз кунед.");
+  }
   try {
     const provider = new firebase.auth.GoogleAuthProvider();
     provider.setCustomParameters({ prompt: "select_account" });
-    const result = await ecoPaintAuth.signInWithPopup(provider);
+    let result;
+    try {
+      result = await ecoPaintAuth.signInWithPopup(provider);
+    } catch (popupError) {
+      // Дар телефон popup аксар вақт баста мешавад — redirect истифода бар.
+      if (String(popupError?.code || "").includes("popup") || /blocked|closed/i.test(String(popupError?.message || ""))) {
+        await ecoPaintAuth.signInWithRedirect(provider);
+        return null;
+      }
+      throw popupError;
+    }
     sessionStorage.setItem("ecoPaintGoogleJustSignedIn", "1");
     sessionStorage.removeItem("ecoPaintGoogleAuthError");
-    // Popup sign-in completes here. Navigating to /admin/ used to discard edits
-    // and, from a local HTML file, could open a nonexistent disk path.
     return result.user;
   } catch (error) {
     const message = error?.code || error?.message || "Google auth error";
@@ -53,5 +64,18 @@ async function startServerGoogleLogin(returnPath) {
   }
 }
 
-window.ecoPaintGoogleReady = ecoPaintAuth ? finishServerGoogleLogin() : Promise.resolve(null);
+window.ecoPaintGoogleReady = (async () => {
+  if (!ecoPaintAuth) return null;
+  try {
+    const redirected = await ecoPaintAuth.getRedirectResult();
+    if (redirected?.user) {
+      sessionStorage.setItem("ecoPaintGoogleJustSignedIn", "1");
+      sessionStorage.removeItem("ecoPaintGoogleAuthError");
+      return redirected.user;
+    }
+  } catch (error) {
+    sessionStorage.setItem("ecoPaintGoogleAuthError", error.code || error.message || "Google auth error");
+  }
+  return finishServerGoogleLogin();
+})();
 window.startServerGoogleLogin = startServerGoogleLogin;
