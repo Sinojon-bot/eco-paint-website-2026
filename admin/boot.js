@@ -55,7 +55,7 @@
     }
 
     await loadScript("../firebase-config.js");
-    await loadScript("admin.js?v=11");
+    await loadScript("admin.js?v=12");
 
     window.ecoPaintFirebaseReady = true;
     window.dispatchEvent(new CustomEvent("ecoPaintFirebaseReady", {
@@ -65,7 +65,7 @@
     if (!loaded) {
       const status = document.getElementById("cloudStatus");
       if (status) {
-        status.textContent = "Google/Firebase бор нашуд. Админи маҳаллӣ кор мекунад; барои интернет интернетро санҷед ё саҳифаро нав кунед.";
+        status.textContent = "Firebase бор нашуд. Админи маҳаллӣ кор мекунад; интернетро санҷед ё саҳифаро нав кунед.";
         status.classList.add("is-error");
       }
     }

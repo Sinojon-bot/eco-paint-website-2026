@@ -365,10 +365,10 @@ const DEFAULT_PRODUCTS = [
       zh: "乳胶漆",
       fa: "امولسیون"
     },
-    image: "images/interior.webp",
+    image: "images/sniezhka.jpg",
     variants: [{ weight: 10, price: 75 }, { weight: 20, price: 140 }],
     coverage: 9,
-    colors: ["#f7f4ef", "#e8dfd0", "#d5c4a8", "#c9d9bd"]
+    colors: ["#ffffff", "#f7f4ef", "#e8dfd0", "#d5c4a8"]
   },
   {
     id: 2,
@@ -592,6 +592,9 @@ function loadProducts() {
           product.variants = original
             ? original.variants.map(variant => ({ ...variant }))
             : [{ weight: 10, price: 75 }, { weight: 20, price: 140 }];
+        }
+        if (Number(product.id) === 1 && /images\/interior\.(webp|png)$/i.test(String(product.image || ""))) {
+          product.image = "images/sniezhka.jpg";
         }
         return product;
       });
@@ -1829,11 +1832,11 @@ let signedInUser = null;
 let pendingAuthAction = null;
 
 const AUTH_TEXT = {
-  tg: ["Бақайдгирӣ", "Барои харид маълумотро як бор нигоҳ доред", "Ворид шудан бо Google", "Google танҳо ном, email ва расми профили шуморо мефиристад.", "ё", "Ному насаб", "Рақами телефон", "Шаҳр ё ноҳия", "Бақайдгирӣ"],
-  ru: ["Регистрация", "Сохраните данные один раз для покупок", "Войти через Google", "Google передаст только имя, email и фото профиля.", "или", "Имя и фамилия", "Номер телефона", "Город или район", "Зарегистрироваться"],
-  en: ["Sign up", "Save your details once for faster checkout", "Continue with Google", "Google only shares your name, email and profile photo.", "or", "Full name", "Phone number", "City or district", "Sign up"],
-  zh: ["注册", "保存一次信息即可快速购物", "使用 Google 登录", "Google 只会分享姓名、邮箱和头像。", "或", "姓名", "电话号码", "城市或地区", "注册"],
-  fa: ["ثبت‌نام", "اطلاعات را یک‌بار برای خرید ذخیره کنید", "ورود با Google", "Google فقط نام، ایمیل و تصویر پروفایل را می‌فرستد.", "یا", "نام و نام خانوادگی", "شماره تلفن", "شهر یا منطقه", "ثبت‌نام"]
+  tg: ["Бақайдгирӣ", "Барои харид ном, телефон ва шаҳрро нависед", "Ному насаб", "Рақами телефон", "Шаҳр ё ноҳия", "Бақайдгирӣ", "Ном, телефон ва шаҳр танҳо барои фармоиш нигоҳ дошта мешаванд."],
+  ru: ["Регистрация", "Для покупки укажите имя, телефон и город", "Имя и фамилия", "Номер телефона", "Город или район", "Зарегистрироваться", "Имя, телефон и город сохраняются только для заказа."],
+  en: ["Sign up", "Enter your name, phone and city to order", "Full name", "Phone number", "City or district", "Sign up", "Name, phone and city are kept only for orders."],
+  zh: ["注册", "填写姓名、电话和城市以便下单", "姓名", "电话号码", "城市或地区", "注册", "姓名、电话和城市仅用于下单。"],
+  fa: ["ثبت‌نام", "برای خرید نام، تلفن و شهر را بنویسید", "نام و نام خانوادگی", "شماره تلفن", "شهر یا منطقه", "ثبت‌نام", "نام، تلفن و شهر فقط برای سفارش ذخیره می‌شود."]
 };
 
 function savedCustomerProfile() {
@@ -1850,16 +1853,13 @@ function showAuth(error = "") {
   const copy = AUTH_TEXT[language] || AUTH_TEXT.tg;
   $("#authTitle").textContent = copy[0];
   $("#authDescription").textContent = copy[1];
-  $("#googleLogin").setAttribute("aria-label", copy[2]);
-  $("#googleLoginLabel").textContent = copy[2];
-  $("#authPrivacy").textContent = copy[3];
-  $("#authOr").textContent = copy[4];
-  $("#authNameLabel").textContent = copy[5];
-  $("#authPhoneLabel").textContent = copy[6];
-  $("#authCityLabel").textContent = copy[7];
-  $("#authSubmit").textContent = copy[8];
+  $("#authNameLabel").textContent = copy[2];
+  $("#authPhoneLabel").textContent = copy[3];
+  $("#authCityLabel").textContent = copy[4];
+  $("#authSubmit").textContent = copy[5];
+  $("#authPrivacy").textContent = copy[6];
   const profile = savedCustomerProfile();
-  $("#authName").value = signedInUser?.name || profile.name || "";
+  $("#authName").value = profile.name || "";
   $("#authPhone").value = profile.phone || "";
   $("#authCity").value = profile.city || "";
   $("#authError").textContent = error;
@@ -1867,68 +1867,12 @@ function showAuth(error = "") {
   $("#authOverlay").classList.remove("hidden");
 }
 
-$("#googleLogin").onclick = async () => {
-  try {
-    await startServerGoogleLogin("/");
-    await loadSignedInUser();
-  } catch (error) {
-    showAuth(`Google ворид нашуд (${error.code || error.message}). Боз як бор кӯшиш кунед.`);
-  }
-};
-
-async function saveCustomerToFirebase(profile) {
-  if (!ecoPaintAuth || !ecoPaintDb) return false;
-  const user = ecoPaintAuth.currentUser;
-  if (!user) return false;
-  const customerRef = ecoPaintDb.collection("customers").doc(user.uid);
-  const existing = await customerRef.get();
-  const data = {
-    uid: user.uid,
-    name: profile.name,
-    email: user.email || profile.email || "",
-    phone: profile.phone,
-    city: profile.city,
-    avatar: user.photoURL || profile.avatar || "",
-    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-  };
-  if (!existing.exists) {
-    data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
-  }
-  await customerRef.set(data, { merge: true });
-  return true;
+async function saveCustomerToFirebase() {
+  return false;
 }
 
 async function loadSignedInUser() {
-  if (!ecoPaintAuth || !/^https?:$/.test(location.protocol)) return;
-  await window.ecoPaintGoogleReady;
-  const authError = sessionStorage.getItem("ecoPaintGoogleAuthError");
-  if (authError) {
-    sessionStorage.removeItem("ecoPaintGoogleAuthError");
-    showAuth(`Google ворид нашуд (${authError}). Танзимоти Client ID-ро санҷед.`);
-    return;
-  }
-  const user = await new Promise(resolve => {
-    const stop = ecoPaintAuth.onAuthStateChanged(value => {
-      stop();
-      resolve(value);
-    });
-  });
-  signedInUser = user ? {
-    uid: user.uid,
-    name: user.displayName || "",
-    email: user.email || "",
-    picture: user.photoURL || ""
-  } : null;
-  if (signedInUser) {
-      const old = savedCustomerProfile();
-      localStorage.setItem("ecoPaintCustomerProfile", JSON.stringify({ ...old, name:signedInUser.name || old.name || "", email:signedInUser.email || old.email || "", avatar:signedInUser.picture || old.avatar || "👤" }));
-      loadProfile();
-      if (sessionStorage.getItem("ecoPaintGoogleJustSignedIn") === "1" && !isRegistered()) {
-        sessionStorage.removeItem("ecoPaintGoogleJustSignedIn");
-        showAuth();
-        $("#authPhone").focus();
-      }
-  }
+  signedInUser = null;
 }
 
 function showProfileAvatar(avatar) {
@@ -1974,17 +1918,10 @@ function closeProfileEditor() {
 }
 
 $("#editProfile").onclick = openProfileEditor;
-$("#profileLogout").onclick = async () => {
-  try {
-    await ecoPaintAuth.signOut();
-  } catch (error) {
-    console.error("Sign out failed", error);
-  }
+$("#profileLogout").onclick = () => {
   signedInUser = null;
   selectedAvatar = "👤";
   localStorage.removeItem("ecoPaintCustomerProfile");
-  sessionStorage.removeItem("ecoPaintGoogleJustSignedIn");
-  sessionStorage.removeItem("ecoPaintGoogleAuthError");
   renderProfile({});
   closeProfileEditor();
   showAuth();

@@ -21,10 +21,9 @@
       <p id="loginError" class="error"></p>
       <button class="primary" type="submit" id="loginSubmit">Ворид шудан</button>
       <button id="quickLocalLogin" class="secondary" type="button">Ворид бо admin / 12345</button>
-      <button id="loginGoogle" class="secondary" type="button">Ворид шудан бо Google-и админ</button>
       <p id="loginHelp" class="login-help">
         <b>Рамз:</b> ном <code>admin</code> · рамз <code>12345</code> (англисӣ нависед).<br>
-        Барои тағйири сайти интернетӣ баъд «Пайваст шудан бо Google»-ро пахш кунед.
+        Баъд аз воридшавӣ «Нигоҳ доштан» — тағйирот ба интернет ва телефон меравад.
       </p>
       <a class="online-admin" href="https://sinojon-bot.github.io/eco-paint-website-2026/admin/">Кушодани админ дар интернет (Chrome) ↗</a>
       <a class="online-admin" href="https://sinojon-bot.github.io/eco-paint-website-2026/">Кушодани сайт дар интернет ↗</a>
@@ -53,8 +52,9 @@
 
     <main>
       <section class="cloud-connection" aria-label="Пайвастшавӣ">
-        <p id="cloudStatus" role="status" aria-live="polite">Маҳсулотро тағйир диҳед ва «Нигоҳ доштан» — агар интернет бошад, худаш ба телефон меравад. Аввал як бор OPEN-SYNC.txt (Firestore Rules)-ро иҷро кунед.</p>
-        <div><button id="connectAdmin" class="primary" type="button">Пайваст шудан бо Google</button>
+        <p id="cloudStatus" role="status" aria-live="polite">Маҳсулотро тағйир диҳед ва «Нигоҳ доштан» — ба интернет ва телефон меравад. Як бор OPEN-SYNC.txt (Firestore Rules)-ро Publish кунед.</p>
+        <div>
+        <button id="publishInternet" class="primary" type="button">Фиристодан ба интернет</button>
         <button id="refreshAdmin" class="secondary" type="button">Нав кардани маълумот</button>
         <a class="secondary" style="display:inline-flex;align-items:center;padding:10px 14px;text-decoration:none" href="https://sinojon-bot.github.io/eco-paint-website-2026/" target="_blank" rel="noopener">Дидани сайт ↗</a></div>
       </section>
@@ -189,17 +189,16 @@
         <div class="topline">
           <div>
             <h1>Харидорон</h1>
-            <p>Одамоне, ки бо Google бақайдгирӣ кардаанд.</p>
+            <p>Одамоне, ки бо ном/телефон бақайдгирӣ кардаанд (дар телефони худ).</p>
           </div>
-          <button id="adminGoogleLogin" class="primary" type="button">Ворид шудан бо Google</button>
         </div>
-        <p id="customerStatus" class="customer-status">Барои дидани рӯйхат бо аккаунти админ ворид шавед.</p>
+        <p id="customerStatus" class="customer-status">Харидорон дар телефони худ нигоҳ дошта мешаванд. Фармоишҳо ба WhatsApp меоянд.</p>
         <div id="customerList" class="customer-list"></div>
       </section>
     </main>
   </div>
 
   <div id="toast" class="toast"></div>
-  <script src="boot.js?v=10"></script>
+  <script src="boot.js?v=12"></script>
 </body>
 </html>

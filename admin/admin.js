@@ -22,10 +22,10 @@ const DEFAULT_PRODUCTS = [
       "امولسیون اکریلیک فوق‌سفید Eco Paint СНЕЖКА برای دیوار و سقف. برای کار داخلی و خارجی."
     ],
     ["Эмулсия", "Эмульсия", "Emulsion", "乳胶漆", "امولسیون"],
-    "images/interior.webp",
+    "images/sniezhka.jpg",
     [[10, 75], [20, 140]],
     9,
-    ["#f7f4ef", "#e8dfd0", "#d5c4a8", "#c9d9bd"]
+    ["#ffffff", "#f7f4ef", "#e8dfd0", "#d5c4a8"]
   ),
   createDefault(
     2,
@@ -253,6 +253,10 @@ function loadProducts() {
             ? original.variants.map(variant => ({ ...variant }))
             : [{ weight: 10, price: 75 }, { weight: 20, price: 140 }];
         }
+        // Барқарории сурати СНЕЖКА агар ба interior.webp иваз шуда бошад.
+        if (Number(product.id) === 1 && /images\/interior\.(webp|png)$/i.test(String(product.image || ""))) {
+          product.image = "images/sniezhka.jpg";
+        }
         return product;
       });
       localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(migrated));
@@ -306,10 +310,8 @@ function hasLocalAdminSession() {
 }
 
 function canEditLocally() {
-  return hasLocalAdminSession() || isCloudAdmin(ecoPaintAuth?.currentUser);
+  return hasLocalAdminSession();
 }
-
-const ADMIN_EMAIL = "sinoitojirsandora@gmail.com";
 
 function escapeHTML(value) {
   return String(value ?? "").replace(/[&<>"']/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
@@ -319,11 +321,6 @@ function adminError(error) {
   const code = error?.code || "";
   if (code.includes("permission-denied")) {
     return "Сервер иҷозат надод. Файли OPEN-SYNC.txt-ро хонед: Firebase → Firestore → Rules-ро аз firestore.rules нав кунед ва Publish занед. Маълумоти шумо нест нашуд.";
-  }
-  if (code.includes("popup-blocked")) return "Браузер равзанаи Google-ро баст. Равзанаҳои поп-апро барои ин сайт иҷозат диҳед ва «Пайваст шудан»-ро пахш кунед.";
-  if (code.includes("popup-closed") || code.includes("cancelled-popup")) return "Воридшавӣ бекор шуд. Маълумот тағйир наёфт.";
-  if (code.includes("unauthorized-domain")) {
-    return "Google ин суроғаро иҷозат намедиҳад. Бе Google ҳам фиристода мешавад: OPEN-SYNC.txt → Firestore Rules-ро Publish кунед, баъд «Нигоҳ доштан». Ё Authorized domains → sinojon-bot.github.io.";
   }
   if (code.includes("unavailable") || code.includes("network")) return "Сервер дастрас нест. Интернетро санҷед; тағйирот ҳанӯз сабт нашуд.";
   return error?.message || "Амал иҷро нашуд. Боз кӯшиш кунед.";
@@ -341,23 +338,13 @@ function showAdmin() {
   renderProducts();
 }
 
-function isCloudAdmin(user) {
-  return Boolean(user && user.email?.toLowerCase() === ADMIN_EMAIL && user.emailVerified);
-}
-
-function requireCloud() {
-  if (!/^https?:$/.test(location.protocol)) throw new Error("Админ аз файл кушода шудааст. OPEN-ADMIN.cmd-ро истифода баред ё «Кушодани админ дар интернет»-ро пахш кунед.");
-  if (!ecoPaintAuth || !ecoPaintDb) {
-    throw new Error("Google/Firebase бор нашуд. Саҳифаро нав кунед (Ctrl+F5). Админи маҳаллӣ кор мекунад; барои телефон боз Google-ро пахш кунед.");
+function requireCloudDb() {
+  if (!/^https?:$/.test(location.protocol)) {
+    throw new Error("Админ аз файл кушода шудааст. Админро аз интернет кушоед.");
   }
-}
-
-async function ensureCloudAdmin() {
-  requireCloud();
-  await window.ecoPaintGoogleReady;
-  const user = ecoPaintAuth.currentUser;
-  if (!isCloudAdmin(user)) throw new Error("Аввал «Пайваст шудан бо Google»-ро пахш кунед ва аккаунти админро интихоб кунед.");
-  return user;
+  if (!ecoPaintDb) {
+    throw new Error("Firebase бор нашуд. Саҳифаро нав кунед (Ctrl+F5).");
+  }
 }
 
 function estimateJsonBytes(value) {
@@ -402,7 +389,7 @@ async function prepareProductForCloud(product) {
 }
 
 async function seedOrLoadCloudProducts() {
-  await ensureCloudAdmin();
+  requireCloudDb();
   const localProducts = products.slice();
   const [snapshot, payment, catalog] = await Promise.all([
     ecoPaintDb.collection("products").get({ source: "server" }),
@@ -414,15 +401,9 @@ async function seedOrLoadCloudProducts() {
   let autoSeeded = false;
 
   if (cloudCatalogNeedsSeed) {
-    // Автоматӣ каталоги ҳозираро (бо тағйироти админ) ба интернет фирист —
-    // то телефон ҳамон чизро бинад. Маълумоти маҳаллиро нест намекунем.
     try {
-      const prepared = [];
-      for (const item of localProducts) {
-        prepared.push(await prepareProductForCloud(item));
-      }
+      const prepared = await publishCatalogToInternet(localProducts);
       products = prepared;
-      await initializeCatalog(prepared);
       autoSeeded = true;
       cloudCatalogNeedsSeed = false;
     } catch (error) {
@@ -444,15 +425,20 @@ async function seedOrLoadCloudProducts() {
       return isPlaceholderProductName(product.name) || isStubPricing(variants);
     });
 
-    products = rawProducts
-      .map(item => {
-        const { cloudId, ...data } = item;
-        return { ...upgradePlaceholderProduct(data), cloudId };
-      })
-      .sort((a, b) => a.id - b.id);
+    // Агар сервер холӣ ё stub бошад — маҳаллиро нигоҳ дор, overwrite накун.
+    if (!rawProducts.length) {
+      products = localProducts;
+    } else {
+      products = rawProducts
+        .map(item => {
+          const { cloudId, ...data } = item;
+          return { ...upgradePlaceholderProduct(data), cloudId };
+        })
+        .sort((a, b) => a.id - b.id);
+    }
 
-    if (needsCloudUpgrade) {
-      await initializeCatalog(products);
+    if (needsCloudUpgrade || !rawProducts.length) {
+      await publishCatalogToInternet(products);
       upgradedCloudCatalog = true;
     }
   }
@@ -463,39 +449,15 @@ async function seedOrLoadCloudProducts() {
   }
   renderProducts();
   if (autoSeeded) {
-    setCloudStatus(`Каталог ба интернет рафт · ${products.length} маҳсулот. Ҳоло дар телефон ҳам ҳаминро мебинед (саҳифаро нав кунед).`);
+    setCloudStatus(`Каталог ба интернет рафт · ${products.length} маҳсулот. Дар телефон саҳифаро нав кунед.`);
   } else if (upgradedCloudCatalog) {
-    setCloudStatus(`Каталог нав шуд · ${products.length} маҳсулот дар интернет. Сурат/нархро тағйир диҳед ва нигоҳ доред.`);
+    setCloudStatus(`Каталог нав шуд · ${products.length} маҳсулот дар интернет.`);
   } else {
-    setCloudStatus(`Пайваст: ${ecoPaintAuth.currentUser.email} · ${products.length} маҳсулот. Тағйирот баъд аз «Нигоҳ доштан» дар телефон ҳам мебарояд.`);
+    setCloudStatus(`Интернет пайваст · ${products.length} маҳсулот. «Нигоҳ доштан» = ба телефон.`);
   }
 }
 
 const PUBLIC_SYNC_KEY = "EcoPaintTJ2026Sync";
-
-async function saveProductToCloud(product) {
-  await ensureCloudAdmin();
-  const ready = await prepareProductForCloud(product);
-  if (cloudCatalogNeedsSeed) {
-    const initial = new Map(products.map(item => [item.id, item]));
-    initial.set(ready.id, ready);
-    const prepared = [];
-    for (const item of initial.values()) {
-      prepared.push(await prepareProductForCloud(item));
-    }
-    await initializeCatalog(prepared);
-    Object.assign(product, ready);
-    return ready;
-  }
-  const { cloudId, ...data } = ready;
-  await ecoPaintDb.collection("products").doc(cloudId || String(ready.id)).set({
-    ...data,
-    syncKey: PUBLIC_SYNC_KEY,
-    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-  }, { merge: true });
-  Object.assign(product, ready);
-  return ready;
-}
 
 async function initializeCatalog(items) {
   const batch = ecoPaintDb.batch();
@@ -515,7 +477,7 @@ async function initializeCatalog(items) {
   cloudCatalogNeedsSeed = false;
 }
 
-// Бе Google ҳам: агар Firestore Rules аз OPEN-SYNC.txt гузошта шуда бошад,
+// Бе Google: агар Firestore Rules аз OPEN-SYNC.txt гузошта шуда бошад,
 // тағйирот ба интернет меравад ва дар телефон дида мешавад.
 async function publishCatalogToInternet(list) {
   if (!ecoPaintDb) {
@@ -525,7 +487,12 @@ async function publishCatalogToInternet(list) {
   for (const item of list) {
     prepared.push(await prepareProductForCloud(item));
   }
+  const keepIds = new Set(prepared.map(item => String(item.cloudId || item.id)));
+  const existing = await ecoPaintDb.collection("products").get({ source: "server" });
   const batch = ecoPaintDb.batch();
+  existing.docs.forEach(doc => {
+    if (!keepIds.has(doc.id)) batch.delete(doc.ref);
+  });
   prepared.forEach(item => {
     const { cloudId, ...data } = item;
     batch.set(
@@ -548,20 +515,21 @@ async function publishCatalogToInternet(list) {
   return prepared;
 }
 
-async function connectAdmin() {
+async function publishNow() {
+  if (!canEditLocally()) {
+    alert("Аввал бо admin / 12345 ворид шавед.");
+    return;
+  }
   try {
-    requireCloud();
-    const user = await startServerGoogleLogin();
-    if (!isCloudAdmin(user)) throw new Error("Ин аккаунт ҳуқуқи админ надорад. Google-и соҳиби мағозаро интихоб кунед.");
-    showAdmin();
-    setCloudStatus("Маълумот аз сервер бор мешавад...");
-    await seedOrLoadCloudProducts();
-    await loadCustomers();
+    requireCloudDb();
+    setCloudStatus("Ба интернет фиристода мешавад...");
+    const prepared = await publishCatalogToInternet(products);
+    products = prepared;
+    saveProducts();
+    setCloudStatus(`Ба интернет рафт · ${products.length} маҳсулот. Дар телефон саҳифаро нав кунед.`);
+    showToast("Ба интернет рафт");
   } catch (error) {
-    const message = adminError(error);
-    setCloudStatus(message, true);
-    $("#loginError").textContent = message;
-    $("#customerStatus").textContent = message;
+    setCloudStatus(adminError(error), true);
   }
 }
 
@@ -602,53 +570,19 @@ async function loadCustomers() {
   const status = $("#customerStatus");
   const list = $("#customerList");
   list.innerHTML = "";
-  if (!ecoPaintAuth || !isCloudAdmin(ecoPaintAuth.currentUser)) {
-    status.textContent = "Барои дидани рӯйхат бо аккаунти админ ворид шавед.";
-    return;
-  }
-  status.textContent = "Маълумот бор шуда истодааст...";
-  try {
-    await ensureCloudAdmin();
-    const snapshot = await ecoPaintDb.collection("customers").get({ source: "server" });
-    status.textContent = `Ҳамагӣ: ${snapshot.size} харидор`;
-    list.innerHTML = snapshot.docs.slice().sort((a, b) =>
-      (b.data().updatedAt?.toMillis?.() || 0) - (a.data().updatedAt?.toMillis?.() || 0)
-    ).map(document => {
-      const customer = document.data();
-      const avatar = /^(https:\/\/|data:image\/)/i.test(customer.avatar || "")
-        ? `<img src="${escapeHTML(customer.avatar)}" alt="" referrerpolicy="no-referrer">`
-        : `<span class="customer-avatar">👤</span>`;
-      return `<article class="customer-card">
-        ${avatar}
-        <div><strong>${escapeHTML(customer.name || "Беном")}</strong><br><small>${escapeHTML(customer.email || "—")}</small></div>
-        <span>☎ ${escapeHTML(customer.phone || "—")}</span>
-        <span>⌖ ${escapeHTML(customer.city || "—")}</span>
-        <small>${customerDate(customer.updatedAt)}</small>
-      </article>`;
-    }).join("");
-  } catch (error) {
-    status.textContent = adminError(error);
-    console.error(error);
-  }
+  status.textContent = "Харидорон дар телефони худ нигоҳ дошта мешаванд. Фармоишҳо ба WhatsApp меоянд.";
 }
 
-$("#adminGoogleLogin").onclick = connectAdmin;
-$("#connectAdmin").onclick = connectAdmin;
-$("#loginGoogle").onclick = connectAdmin;
+$("#publishInternet").onclick = publishNow;
 $("#refreshAdmin").onclick = async () => {
   try {
-    if (isCloudAdmin(ecoPaintAuth?.currentUser)) {
-      await seedOrLoadCloudProducts();
-      await loadCustomers();
-      return;
-    }
     products = loadProducts();
     renderProducts();
-    setCloudStatus(
-      ecoPaintAuth
-        ? "Маълумоти маҳаллӣ нав шуд. Барои телефон «Пайваст шудан бо Google»-ро пахш кунед."
-        : "Маълумоти маҳаллӣ нав шуд. Google ҳоло бор нашудааст — саҳифаро нав кунед ва боз кӯшиш кунед."
-    );
+    if (ecoPaintDb) {
+      await seedOrLoadCloudProducts();
+      return;
+    }
+    setCloudStatus("Маълумоти маҳаллӣ нав шуд. Firebase бор нашуд — саҳифаро нав кунед.");
   } catch (error) {
     setCloudStatus(adminError(error), true);
   }
@@ -810,31 +744,24 @@ async function deleteProduct(id) {
   if (!accepted) return;
 
   if (!canEditLocally()) {
-    alert("Аввал бо admin/12345 ё Google-и админ ворид шавед.");
+    alert("Аввал бо admin / 12345 ворид шавед.");
     return;
   }
 
   try {
-    if (isCloudAdmin(ecoPaintAuth?.currentUser)) {
-      await ensureCloudAdmin();
-      if (cloudCatalogNeedsSeed) await initializeCatalog(products.filter(item => item.id !== id));
-      else {
-        const batch = ecoPaintDb.batch();
-        batch.delete(ecoPaintDb.collection("products").doc(product.cloudId || String(id)));
-        batch.set(ecoPaintDb.collection("settings").doc("catalog"), { initialized: true });
-        await batch.commit();
-      }
-      products = products.filter(item => item.id !== id);
-      saveProducts();
-      renderProducts();
-      showToast("Маҳсулот аз ҳамаи дастгоҳҳо нест карда шуд");
-      return;
-    }
-
     products = products.filter(item => item.id !== id);
     saveProducts();
     renderProducts();
-    setCloudStatus("Маҳсулот дар ин компютер нест шуд. Барои сайти интернетӣ бо Google-и админ пайваст шавед.");
+    if (ecoPaintDb) {
+      try {
+        await publishCatalogToInternet(products);
+        setCloudStatus("Маҳсулот аз интернет ҳам нест шуд.");
+        showToast("Маҳсулот аз ҳамаи дастгоҳҳо нест карда шуд");
+        return;
+      } catch (error) {
+        setCloudStatus(adminError(error), true);
+      }
+    }
     showToast("Маҳсулот нест карда шуд");
   } catch (error) {
     setCloudStatus(adminError(error), true);
@@ -899,7 +826,10 @@ function tryLocalAdminLogin(fromQuickButton = false) {
     $("#adminView").classList.remove("hidden");
     sessionStorage.setItem("ecoPaintAdmin", "yes");
     renderProducts();
-    setCloudStatus("Ворид шудед (маҳаллӣ). Барои сайти интернетӣ «Пайваст шудан бо Google»-ро пахш кунед.");
+    setCloudStatus("Админ кушода аст. Маҳсулотро тағйир диҳед → «Нигоҳ доштан» ё «Фиристодан ба интернет».");
+    if (ecoPaintDb) {
+      seedOrLoadCloudProducts().catch(error => setCloudStatus(adminError(error), true));
+    }
     showToast("Админ кушода шуд");
     return true;
   }
@@ -1008,13 +938,8 @@ $("#productForm").onsubmit = async event => {
   event.preventDefault();
   const id = Number($("#productId").value) || Date.now();
   if (!canEditLocally()) {
-    alert("Аввал бо admin/12345 ё Google-и админ ворид шавед.");
+    alert("Аввал бо admin / 12345 ворид шавед.");
     return;
-  }
-  const cloudSave = isCloudAdmin(ecoPaintAuth?.currentUser);
-  if (cloudSave) {
-    try { await ensureCloudAdmin(); }
-    catch (error) { setCloudStatus(adminError(error), true); alert(adminError(error)); return; }
   }
   const previous = products.find(item => item.id === id);
   let image;
@@ -1100,16 +1025,7 @@ $("#productForm").onsubmit = async event => {
   }
 
   let published = false;
-  if (cloudSave) {
-    try {
-      saveButton.textContent = "Дар сервер нигоҳ дошта мешавад...";
-      await saveProductToCloud(product);
-      published = true;
-    } catch (error) {
-      console.error(error);
-    }
-  }
-  if (!published && ecoPaintDb) {
+  if (ecoPaintDb) {
     try {
       saveButton.textContent = "Ба интернет фиристода мешавад...";
       const prepared = await publishCatalogToInternet(products);
@@ -1118,7 +1034,6 @@ $("#productForm").onsubmit = async event => {
       published = true;
     } catch (error) {
       setCloudStatus(adminError(error), true);
-      // Маълумоти маҳаллӣ монд — танҳо интернет қатъ шуд.
     }
   }
 
@@ -1173,24 +1088,23 @@ $("#paymentForm").onsubmit = async event => {
       .split(",").map(word => word.trim().toLowerCase()).filter(Boolean)
   };
   if (!canEditLocally()) {
-    alert("Аввал бо admin/12345 ё Google-и админ ворид шавед.");
+    alert("Аввал бо admin / 12345 ворид шавед.");
     return;
   }
   const saveButton = event.target.querySelector("button[type='submit'], button.save");
   saveButton.disabled = true;
   try {
-    if (isCloudAdmin(ecoPaintAuth?.currentUser)) {
-      await ensureCloudAdmin();
+    localStorage.setItem("ecoPaintPaymentSettings", JSON.stringify(settings));
+    if (ecoPaintDb) {
       await ecoPaintDb.collection("settings").doc("payment").set({
         ...settings,
+        syncKey: PUBLIC_SYNC_KEY,
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-      localStorage.setItem("ecoPaintPaymentSettings", JSON.stringify(settings));
-      setCloudStatus("Танзими пардохт дар сервер нигоҳ дошта шуд.");
+      }, { merge: true });
+      setCloudStatus("Пардохт ба интернет рафт.");
       showToast("Пардохт дар ҳамаи дастгоҳҳо нав шуд");
     } else {
-      localStorage.setItem("ecoPaintPaymentSettings", JSON.stringify(settings));
-      setCloudStatus("Пардохт дар ин компютер нигоҳ дошта шуд. Барои сайтҳои интернетӣ бо Google-и админ пайваст шавед.");
+      setCloudStatus("Пардохт дар ин компютер нигоҳ дошта шуд.");
       showToast("Пардохт нигоҳ дошта шуд");
     }
   } catch (error) {
@@ -1210,12 +1124,7 @@ document.querySelectorAll(".nav").forEach(button => {
   };
 });
 
-$("#logout").onclick = async () => {
-  try {
-    if (ecoPaintAuth) await ecoPaintAuth.signOut();
-  } catch (error) {
-    console.error("Sign out failed", error);
-  }
+$("#logout").onclick = () => {
   sessionStorage.removeItem("ecoPaintAdmin");
   location.reload();
 };
@@ -1245,22 +1154,16 @@ if (sessionStorage.getItem("ecoPaintAdmin") === "yes") {
   $("#loginView").classList.add("hidden");
   $("#adminView").classList.remove("hidden");
   renderProducts();
-  if (!isCloudAdmin(ecoPaintAuth?.currentUser)) {
-    setCloudStatus("Админ кушода аст. Барои телефон «Пайваст шудан бо Google»-ро пахш кунед.");
+  setCloudStatus("Админ кушода аст. «Нигоҳ доштан» ё «Фиристодан ба интернет» — ба телефон.");
+  if (ecoPaintDb) {
+    seedOrLoadCloudProducts().catch(error => setCloudStatus(adminError(error), true));
   }
 }
 
 if (location.protocol === "file:") {
-  const message = "Ин нусха аз файл кушода шудааст. OPEN-ADMIN.cmd ё админи интернетиро кушоед.";
+  const message = "Ин нусха аз файл кушода шудааст. Админро аз интернет кушоед.";
   $("#loginHelp").textContent = message;
   setCloudStatus(message, true);
-} else if (ecoPaintAuth) {
-  ecoPaintAuth.onAuthStateChanged(async user => {
-    if (!isCloudAdmin(user)) return;
-    showAdmin();
-    try { await seedOrLoadCloudProducts(); }
-    catch (error) { setCloudStatus(adminError(error), true); }
-  });
-} else {
-  setCloudStatus("Google ҳоло омода нест. Админи маҳаллӣ кор мекунад — саҳифаро нав кунед ва боз «Пайваст шудан бо Google»-ро пахш кунед.", true);
+} else if (!ecoPaintDb) {
+  setCloudStatus("Firebase ҳоло омода нест. Админи маҳаллӣ кор мекунад — саҳифаро нав кунед.", true);
 }

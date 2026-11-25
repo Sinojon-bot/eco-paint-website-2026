@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-25T18:05:18.988Z",
+  "updatedAt": "2026-11-25T18:14:46.216Z",
   "products": [
     {
       "id": 1,
@@ -24,7 +24,7 @@
         "zh": "乳胶漆",
         "fa": "امولسیون"
       },
-      "image": "images/interior.webp",
+      "image": "images/sniezhka.jpg",
       "variants": [
         {
           "weight": 10,
@@ -37,10 +37,10 @@
       ],
       "coverage": 9,
       "colors": [
+        "#ffffff",
         "#f7f4ef",
         "#e8dfd0",
-        "#d5c4a8",
-        "#c9d9bd"
+        "#d5c4a8"
       ]
     },
     {
