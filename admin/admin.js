@@ -1328,10 +1328,9 @@ if (location.protocol === "file:") {
   setCloudStatus("Firebase ҳоло омода нест — саҳифаро нав кунед.", true);
 }
 
-// Агар sync қатъ шуда бошад, ҳар 20 сония боз кӯшиш мекунад (GitHub ё Firebase).
+// Танҳо агар фиристодан ноком шавад — ҳар 30 сония як бор боз кӯшиш (муваффақро такрор намекунад).
 setInterval(() => {
   if (!canEditLocally()) return;
-  const lastOk = Number(localStorage.getItem("ecoPaintLastSyncOk") || 0);
-  if (Date.now() - lastOk < 15000) return;
+  if (localStorage.getItem("ecoPaintLastSyncOk")) return;
   autoPublishToPhone(products, 1).catch(() => {});
-}, 20000);
+}, 30000);
