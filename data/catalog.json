@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-26T16:27:44.404Z",
+  "updatedAt": "2026-11-26T16:28:30.068Z",
   "products": [
     {
       "id": 1,
@@ -158,17 +158,17 @@
       },
       "description": {
         "tg": "эмульсия акриловий сафед сифати премиум барои дохили хона пешбини шудааст",
-        "en": "Premium quality white acrylic emulsion is intended for indoor use.",
         "ru": "Высококачественная белая акриловая эмульсия предназначена для внутренних работ.",
+        "en": "Premium quality white acrylic emulsion is intended for indoor use.",
         "zh": "优质白色丙烯酸乳胶漆，适用于室内。",
         "fa": "امولسیون اکریلیک سفید با کیفیت ممتاز برای استفاده در فضای داخلی طراحی شده است"
       },
       "category": {
         "tg": "Эмулсия (премиум)",
+        "ru": "Эмульсия (премиум)",
         "en": "Emulsion (premium)",
-        "fa": "امولسیون (پریمیوم)",
         "zh": "乳液（高级）",
-        "ru": "Эмульсия (премиум)"
+        "fa": "امولسیون (پریمیوم)"
       },
       "image": "images/granite.jpg",
       "variants": [
@@ -190,7 +190,7 @@
         }
       ],
       "discount": 0,
-      "coverage": 7,
+      "coverage": 6,
       "colors": [
         "#e8e4dc",
         "#c9c2b4",
