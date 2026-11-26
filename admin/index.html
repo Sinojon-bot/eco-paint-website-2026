@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Eco Paint — Админ</title>
-  <link rel="stylesheet" href="admin.css?v=14">
+  <link rel="stylesheet" href="admin.css?v=22">
   <link rel="stylesheet" href="admin-language.css">
 </head>
 <body>
@@ -52,11 +52,11 @@
 
     <main>
       <section class="cloud-connection" aria-label="Пайвастшавӣ">
-        <p id="cloudStatus" role="status" aria-live="polite">Маҳсулотро тағйир диҳед ва «Нигоҳ доштан» — ба интернет ва телефон меравад. Як бор OPEN-SYNC.txt (Firestore Rules)-ро Publish кунед.</p>
-        <div class="cloud-actions">
+        <p id="cloudStatus" role="status" aria-live="polite">Маҳсулотро тағйир диҳед ва «Нигоҳ доштан» — ба интернет ва телефон меравад.</p>
+        <div>
         <button id="publishInternet" class="primary" type="button">Фиристодан ба интернет</button>
         <button id="refreshAdmin" class="secondary" type="button">Нав кардани маълумот</button>
-        <button id="restoreBackup" class="secondary" type="button">Барқарор аз нусха</button>
+        <button id="restoreBackup" class="secondary" type="button" title="Барқарор аз нусха">↩ Нусха</button>
         <a class="secondary" style="display:inline-flex;align-items:center;padding:10px 14px;text-decoration:none" href="https://sinojon-bot.github.io/eco-paint-website-2026/" target="_blank" rel="noopener">Дидани сайт ↗</a></div>
       </section>
       <section id="productsView" class="view">
@@ -200,6 +200,6 @@
   </div>
 
   <div id="toast" class="toast"></div>
-  <script src="boot.js?v=16"></script>
+  <script src="boot.js?v=22"></script>
 </body>
 </html>
