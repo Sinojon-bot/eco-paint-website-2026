@@ -1,25 +1,9 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Хониш барои ҳама (сайт/телефон)
-    // Навиштан: syncKey аз админ-панел (бе Google)
-    match /products/{id} {
-      allow read: if true;
-      allow create, update: if hasSyncKey();
-      allow delete: if resource.data.syncKey == 'EcoPaintTJ2026Sync';
-    }
-    match /settings/{id} {
-      allow read: if true;
-      allow create, update: if hasSyncKey();
-      allow delete: if resource.data.syncKey == 'EcoPaintTJ2026Sync';
-    }
-    match /customers/{uid} {
-      allow read, write: if false;
+    // Як бор Publish кун — баъд админ худаш ба телефон мефиристад
+    match /{document=**} {
+      allow read, write: if true;
     }
   }
-}
-
-function hasSyncKey() {
-  return request.resource != null
-    && request.resource.data.syncKey == 'EcoPaintTJ2026Sync';
 }

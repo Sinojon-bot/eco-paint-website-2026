@@ -370,7 +370,7 @@ function escapeHTML(value) {
 function adminError(error) {
   const code = error?.code || "";
   if (code.includes("permission-denied")) {
-    return "Сервер иҷозат надод. Файли OPEN-SYNC.txt-ро хонед: Firebase → Firestore → Rules-ро аз firestore.rules нав кунед ва Publish занед. Маълумоти шумо нест нашуд.";
+    return "ЯК БОР Rules-ро Publish кун (файли OPEN-SYNC.txt). Баъд тағйирот худаш ба телефон меравад. Маълумоти ту нест нашуд.";
   }
   if (code.includes("unavailable") || code.includes("network")) return "Сервер дастрас нест. Интернетро санҷед; тағйирот ҳанӯз сабт нашуд.";
   return error?.message || "Амал иҷро нашуд. Боз кӯшиш кунед.";
@@ -528,8 +528,7 @@ async function initializeCatalog(items) {
   cloudCatalogNeedsSeed = false;
 }
 
-// Агар Firestore Rules аз OPEN-SYNC.txt гузошта шуда бошад,
-// тағйирот ба интернет меравад ва дар телефон дида мешавад.
+// Тағйирот ба интернет → телефон (автомат)
 async function publishCatalogToInternet(list) {
   if (!ecoPaintDb) {
     throw new Error("Firebase бор нашуд. Саҳифаро нав кунед.");
@@ -563,7 +562,27 @@ async function publishCatalogToInternet(list) {
   }, { merge: true });
   await batch.commit();
   cloudCatalogNeedsSeed = false;
+  localStorage.setItem("ecoPaintLastSyncOk", String(Date.now()));
   return prepared;
+}
+
+async function autoPublishToPhone(list = products, attempts = 3) {
+  if (!ecoPaintDb || !canEditLocally()) return false;
+  let lastError = null;
+  for (let i = 0; i < attempts; i += 1) {
+    try {
+      const prepared = await publishCatalogToInternet(list);
+      products = prepared;
+      saveProducts();
+      setCloudStatus(`Автомат ба телефон рафт · ${products.length} маҳсулот. Телефонро нав кунед.`);
+      return true;
+    } catch (error) {
+      lastError = error;
+      await new Promise(resolve => setTimeout(resolve, 700 * (i + 1)));
+    }
+  }
+  if (lastError) setCloudStatus(adminError(lastError), true);
+  return false;
 }
 
 async function publishNow() {
@@ -571,17 +590,9 @@ async function publishNow() {
     alert("Аввал бо admin / 12345 ворид шавед.");
     return;
   }
-  try {
-    requireCloudDb();
-    setCloudStatus("Ба интернет фиристода мешавад...");
-    const prepared = await publishCatalogToInternet(products);
-    products = prepared;
-    saveProducts();
-    setCloudStatus(`Ба интернет рафт · ${products.length} маҳсулот. Дар телефон саҳифаро нав кунед.`);
-    showToast("Ба интернет рафт");
-  } catch (error) {
-    setCloudStatus(adminError(error), true);
-  }
+  setCloudStatus("Ба интернет фиристода мешавад...");
+  const ok = await autoPublishToPhone(products, 3);
+  if (ok) showToast("Ба интернет рафт");
 }
 
 function imageForAdmin(source) {
@@ -885,9 +896,11 @@ function tryLocalAdminLogin(fromQuickButton = false) {
     $("#adminView").classList.remove("hidden");
     sessionStorage.setItem("ecoPaintAdmin", "yes");
     renderProducts();
-    setCloudStatus("Админ кушода аст. Маҳсулотро тағйир диҳед → «Нигоҳ доштан» ё «Фиристодан ба интернет».");
+    setCloudStatus("Админ кушода аст. Тағйир деҳ → Нигоҳ доштан — худаш ба телефон меравад.");
     if (ecoPaintDb) {
-      seedOrLoadCloudProducts().catch(error => setCloudStatus(adminError(error), true));
+      seedOrLoadCloudProducts()
+        .then(() => autoPublishToPhone(products, 2))
+        .catch(error => setCloudStatus(adminError(error), true));
     }
     showToast("Админ кушода шуд");
     return true;
@@ -1083,23 +1096,10 @@ $("#productForm").onsubmit = async event => {
     return;
   }
 
-  let published = false;
-  if (ecoPaintDb) {
-    try {
-      saveButton.textContent = "Ба интернет фиристода мешавад...";
-      const prepared = await publishCatalogToInternet(products);
-      products = prepared;
-      saveProducts();
-      published = true;
-    } catch (error) {
-      setCloudStatus(adminError(error), true);
-    }
-  }
-
-  if (published) {
-    setCloudStatus("Ба интернет рафт · дар телефон саҳифаро нав кунед. Маълумоти админ нигоҳ дошта шуд.");
-  } else if (!ecoPaintDb) {
-    setCloudStatus("Дар компютер нигоҳ дошта шуд. Firebase бор нашуд — саҳифаро нав кунед ва боз «Нигоҳ доштан».", true);
+  saveButton.textContent = "Автомат ба интернет...";
+  const published = await autoPublishToPhone(products, 3);
+  if (!published && !ecoPaintDb) {
+    setCloudStatus("Дар компютер нигоҳ дошта шуд. Саҳифаро нав кунед.", true);
   }
 
   saveButton.disabled = false;
@@ -1107,11 +1107,7 @@ $("#productForm").onsubmit = async event => {
 
   renderProducts();
   showView("productsView");
-  showToast(
-    index >= 0
-      ? "Тағйирот нигоҳ дошта шуд"
-      : "Маҳсулот илова шуд"
-  );
+  showToast(published ? "Нигоҳ дошта шуд · ба телефон рафт" : "Нигоҳ дошта шуд (интернет қатъ)");
 };
 
 $("#imageFile").onchange = () => {
@@ -1213,9 +1209,11 @@ if (sessionStorage.getItem("ecoPaintAdmin") === "yes") {
   $("#loginView").classList.add("hidden");
   $("#adminView").classList.remove("hidden");
   renderProducts();
-  setCloudStatus("Админ кушода аст. «Нигоҳ доштан» ё «Фиристодан ба интернет» — ба телефон.");
+  setCloudStatus("Админ кушода аст. Тағйирот худаш ба телефон меравад.");
   if (ecoPaintDb) {
-    seedOrLoadCloudProducts().catch(error => setCloudStatus(adminError(error), true));
+    seedOrLoadCloudProducts()
+      .then(() => autoPublishToPhone(products, 2))
+      .catch(error => setCloudStatus(adminError(error), true));
   }
 }
 
@@ -1224,5 +1222,13 @@ if (location.protocol === "file:") {
   $("#loginHelp").textContent = message;
   setCloudStatus(message, true);
 } else if (!ecoPaintDb) {
-  setCloudStatus("Firebase ҳоло омода нест. Админи маҳаллӣ кор мекунад — саҳифаро нав кунед.", true);
+  setCloudStatus("Firebase ҳоло омода нест — саҳифаро нав кунед.", true);
 }
+
+// Агар як бор Rules Publish нашуда бошад, ҳар 20 сония боз кӯшиш мекунад.
+setInterval(() => {
+  if (!canEditLocally() || !ecoPaintDb) return;
+  const lastOk = Number(localStorage.getItem("ecoPaintLastSyncOk") || 0);
+  if (Date.now() - lastOk < 15000) return;
+  autoPublishToPhone(products, 1).catch(() => {});
+}, 20000);
