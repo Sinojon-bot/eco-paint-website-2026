@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-26T16:32:11.441Z",
+  "updatedAt": "2026-11-26T16:32:50.516Z",
   "products": [
     {
       "id": 1,
@@ -291,44 +291,6 @@
         "#efe6d8",
         "#c9b29a",
         "#a07050"
-      ]
-    },
-    {
-      "id": 7,
-      "name": {
-        "tg": "ARESHKA",
-        "ru": "ARESHKA",
-        "en": "ARESHKA",
-        "zh": "ARESHKA",
-        "fa": "ARESHKA"
-      },
-      "description": {
-        "tg": "Ранги Eco Paint ARESHKA — 20 кг.",
-        "ru": "Краска Eco Paint ARESHKA — 20 кг.",
-        "en": "Eco Paint ARESHKA paint — 20 kg.",
-        "zh": "Eco Paint ARESHKA paint — 20 kg.",
-        "fa": "Ранги Eco Paint ARESHKA — 20 кг."
-      },
-      "category": {
-        "tg": "Эмулсия",
-        "ru": "Эмульсия",
-        "en": "Emulsion",
-        "zh": "乳胶漆",
-        "fa": "امولسیون"
-      },
-      "image": "images/areshka.jpg",
-      "variants": [
-        {
-          "weight": 20,
-          "price": 0
-        }
-      ],
-      "discount": 0,
-      "coverage": 8,
-      "colors": [
-        "#ffffff",
-        "#f3f1ec",
-        "#e6e2d8"
       ]
     },
     {
