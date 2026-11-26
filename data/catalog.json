@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-26T16:25:40.388Z",
+  "updatedAt": "2026-11-26T16:26:39.548Z",
   "products": [
     {
       "id": 1,
@@ -207,18 +207,18 @@
         "fa": "MAGMA"
       },
       "description": {
-        "tg": "Ранги Eco Paint MAGMA — 20 кг.",
-        "ru": "Краска Eco Paint MAGMA — 20 кг.",
-        "en": "Eco Paint MAGMA paint — 20 kg.",
-        "zh": "Eco Paint MAGMA paint — 20 kg.",
-        "fa": "Ранги Eco Paint MAGMA — 20 кг."
+        "tg": "эмульсия сифати стандарт",
+        "zh": "标准质量乳液",
+        "en": "Standard quality emulsion",
+        "ru": "Эмульсия стандартного качества",
+        "fa": "امولسیون با کیفیت استاندارد"
       },
       "category": {
-        "tg": "Эмулсия",
-        "ru": "Эмульсия",
-        "en": "Emulsion",
-        "zh": "乳胶漆",
-        "fa": "امولسیون"
+        "tg": "Эмулсия сифати (стандарт)",
+        "zh": "乳液质量（标准）",
+        "ru": "Качество эмульсии (стандарт)",
+        "en": "Emulsion quality (standard)",
+        "fa": "کیفیت امولسیون (استاندارد)"
       },
       "image": "images/magma.jpg",
       "variants": [
