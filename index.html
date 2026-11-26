@@ -16,14 +16,19 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=18">
-  <link rel="stylesheet" href="language.css?v=18">
-  <link rel="stylesheet" href="features.css?v=18">
+  <link rel="stylesheet" href="style.css?v=19">
+  <link rel="stylesheet" href="language.css?v=19">
+  <link rel="stylesheet" href="features.css?v=19">
   <script>
     // Агар телефон нусхаи кӯҳнаро нигоҳ дошта бошад — як бор нав мекунад.
     (function () {
-      var V = "18";
+      var V = "19";
       try {
+        // Каталоги кӯҳнаи ҳар дастгоҳро пок кун — ҳама аз интернет мегиранд.
+        localStorage.removeItem("ecoPaintProductsAutoV4");
+        localStorage.removeItem("ecoPaintProductsAutoV3");
+        localStorage.removeItem("ecoPaintProductsAutoV2");
+        localStorage.removeItem("ecoPaintProductsAutoV1");
         if (localStorage.getItem("ecoPaintSiteV") !== V) {
           localStorage.setItem("ecoPaintSiteV", V);
           if (!/[?&]fresh=1/.test(location.search)) {
@@ -168,7 +173,7 @@
     </section>
   </div>
 
-  <script src="script.js?v=18" defer></script>
+  <script src="script.js?v=19" defer></script>
   <script defer>
     (function () {
       function load(src) {

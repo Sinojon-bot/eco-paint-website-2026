@@ -570,46 +570,26 @@ function upgradePlaceholderProduct(product) {
   return normalizeProduct(next);
 }
 
-const PRODUCTS_STORAGE_KEY = "ecoPaintProductsAutoV4";
+// V5: сайт аз интернет мегирад — телефон ва компютер якхела мешаванд.
+const PRODUCTS_STORAGE_KEY = "ecoPaintProductsLiveV5";
 
 function loadProducts() {
+  // Аввал defaults; баъд catalog.json / Firestore ҳамаро якхела мекунад.
+  const normalizedDefaults = DEFAULT_PRODUCTS.map(normalizeProduct);
   try {
-    const rawV4 = localStorage.getItem(PRODUCTS_STORAGE_KEY);
-    const rawV3 = localStorage.getItem("ecoPaintProductsAutoV3");
-    const rawV2 = localStorage.getItem("ecoPaintProductsAutoV2");
-    const rawV1 = localStorage.getItem("ecoPaintProductsAutoV1");
-    const saved = JSON.parse(rawV4 || rawV3 || rawV2 || rawV1);
-    // Массиви холӣ ҳам натиҷаи дуруст аст: админ метавонад ҳамаи
-    // маҳсулотро нест кунад. Дар ин ҳолат маҳсулоти пешфарзро барнагардон.
-    // Муҳим: маълумоти админро overwrite накун — танҳо ҳамонро нигоҳ дор.
-    if (Array.isArray(saved)) {
-      const migrated = saved.map(item => {
+    const saved = JSON.parse(localStorage.getItem(PRODUCTS_STORAGE_KEY) || "null");
+    if (Array.isArray(saved) && saved.length) {
+      return saved.map(item => {
         const product = upgradePlaceholderProduct(item);
-        if (!product.variants.length) {
-          const original = DEFAULT_PRODUCTS.find(
-            defaultProduct => defaultProduct.id === product.id
-          );
-          product.variants = original
-            ? original.variants.map(variant => ({ ...variant }))
-            : [{ weight: 10, price: 75 }, { weight: 20, price: 140 }];
-        }
         if (Number(product.id) === 1 && /images\/(interior\.(webp|png)|sniezhka\.jpg)$/i.test(String(product.image || ""))) {
           product.image = "images/sniezhka-sm.jpg";
         }
         return product;
       });
-      localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(migrated));
-      return migrated;
     }
   } catch (error) {
     console.error(error);
   }
-
-  const normalizedDefaults = DEFAULT_PRODUCTS.map(normalizeProduct);
-  localStorage.setItem(
-    PRODUCTS_STORAGE_KEY,
-    JSON.stringify(normalizedDefaults)
-  );
   return normalizedDefaults;
 }
 
@@ -676,15 +656,17 @@ function catalogScore(list) {
 
 function applyRemoteProducts(list) {
   if (!Array.isArray(list) || !list.length) return false;
-  // Агар маҳаллӣ бойтар бошад (сурати админ), сервери холиро қабул накун.
-  if (catalogScore(products) > catalogScore(list) + 2) return false;
+  // Интернет = ҳақиқат: телефон ва компютер ҳамеша якхела.
   products = list
-    .map(item => upgradePlaceholderProduct(item))
+    .map(item => {
+      const product = upgradePlaceholderProduct(item);
+      if (Number(product.id) === 1 && /images\/(interior\.(webp|png)|sniezhka\.jpg)$/i.test(String(product.image || ""))) {
+        product.image = "images/sniezhka-sm.jpg";
+      }
+      return product;
+    })
     .sort((a, b) => a.id - b.id);
   localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(products));
-  if (products.length) {
-    localStorage.setItem("ecoPaintProductsBackupV4", JSON.stringify(products));
-  }
   pruneCart();
   renderCategories();
   renderProducts();
@@ -694,7 +676,7 @@ function applyRemoteProducts(list) {
 
 async function loadCatalogJsonFallback() {
   try {
-    const response = await fetch(`data/catalog.json?_=${Date.now()}`, { cache: "no-store" });
+    const response = await fetch(`data/catalog.json?v=19&_=${Date.now()}`, { cache: "no-store" });
     if (!response.ok) return;
     const payload = await response.json();
     const list = Array.isArray(payload) ? payload : payload?.products;

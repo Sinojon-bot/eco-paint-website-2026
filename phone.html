@@ -6,15 +6,21 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <title>Eco Paint — телефон</title>
   <script>
-    // Силкаи нав барои телефон — каши кӯҳнаро намегирад.
-    location.replace("./?fresh=1&v=18&t=" + Date.now());
+    try {
+      localStorage.removeItem("ecoPaintProductsAutoV4");
+      localStorage.removeItem("ecoPaintProductsAutoV3");
+      localStorage.removeItem("ecoPaintProductsAutoV2");
+      localStorage.removeItem("ecoPaintProductsAutoV1");
+      localStorage.setItem("ecoPaintSiteV", "19");
+    } catch (e) {}
+    location.replace("./?fresh=1&v=19&t=" + Date.now());
   </script>
-  <meta http-equiv="refresh" content="0;url=./?fresh=1&v=18">
+  <meta http-equiv="refresh" content="0;url=./?fresh=1&v=19">
 </head>
 <body>
   <p style="font-family:sans-serif;padding:24px;text-align:center">
     Кушода истодааст…
-    <br><a href="./?fresh=1&v=18">Агар накушод, инҷо пахш кунед</a>
+    <br><a href="./?fresh=1&v=19">Агар накушод, инҷо пахш кунед</a>
   </p>
 </body>
 </html>

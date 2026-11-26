@@ -328,6 +328,8 @@ function saveProducts() {
   if (Array.isArray(products) && products.length) {
     localStorage.setItem(PRODUCTS_BACKUP_KEY, payload);
     localStorage.setItem("ecoPaintProductsAutoV3", payload);
+    // Сайт ҳам ҳаминро мебинад (телефон = компютер).
+    localStorage.setItem("ecoPaintProductsLiveV5", payload);
   }
 }
 
