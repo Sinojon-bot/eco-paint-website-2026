@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-26T16:01:46.861Z",
+  "updatedAt": "2026-11-26T16:02:20.052Z",
   "products": [
     {
       "id": 1,
@@ -412,7 +412,7 @@
         }
       ],
       "discount": 0,
-      "coverage": 7,
+      "coverage": 6,
       "colors": [
         "#efe6d8",
         "#c9b29a",
