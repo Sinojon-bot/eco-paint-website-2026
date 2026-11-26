@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-26T14:26:18.514Z",
+  "updatedAt": "2026-11-26T15:21:01.025Z",
   "products": [
     {
       "id": 1,
@@ -35,12 +35,13 @@
           "price": 140
         }
       ],
+      "discount": 0,
       "coverage": 9,
       "colors": [
-        "#ffffff",
         "#f7f4ef",
         "#e8dfd0",
-        "#d5c4a8"
+        "#d5c4a8",
+        "#c9d9bd"
       ]
     },
     {
@@ -81,6 +82,7 @@
           "price": 215
         }
       ],
+      "discount": 0,
       "coverage": 7,
       "colors": [
         "#f2efe8",
@@ -127,6 +129,7 @@
           "price": 310
         }
       ],
+      "discount": 0,
       "coverage": 5,
       "colors": [
         "#efe6d8",
@@ -173,6 +176,7 @@
           "price": 135
         }
       ],
+      "discount": 0,
       "coverage": 12,
       "colors": [
         "#ffffff",
@@ -218,6 +222,7 @@
           "price": 155
         }
       ],
+      "discount": 0,
       "coverage": 8,
       "colors": [
         "#ffffff",
@@ -262,6 +267,7 @@
           "price": 265
         }
       ],
+      "discount": 0,
       "coverage": 8,
       "colors": [
         "#f5f2eb",
