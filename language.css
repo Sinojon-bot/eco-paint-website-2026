@@ -42,48 +42,27 @@ html[dir="rtl"] body {
   text-align: right;
 }
 
+/* Телефон ҳам намуди компютерро нигоҳ медорад */
 @media (max-width: 760px) {
   header {
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    grid-template-areas:
-      "logo langs cart"
-      "search search search";
-    align-items: center;
-    height: auto;
-    row-gap: 8px;
-    column-gap: 8px;
+    height: 78px;
+    flex-wrap: nowrap;
+    gap: 10px;
   }
 
-  .logo { grid-area: logo; margin: 0; }
-  .language-picker { grid-area: langs; justify-self: end; margin: 0; }
-  .cartBtn { grid-area: cart; margin: 0; }
   .search {
-    grid-area: search;
-    width: 100%;
     min-width: 0;
-    order: unset;
+    height: 48px;
+    font-size: 18px;
   }
 
   .language-picker button {
-    width: 28px;
-    height: 27px;
-    padding: 3px;
+    width: 30px;
+    height: 28px;
   }
 
   .language-picker button img {
     width: 22px;
     height: 15px;
-  }
-}
-
-@media (max-width: 480px) {
-  .language-picker {
-    gap: 2px;
-    padding: 3px;
-  }
-
-  .search {
-    height: 44px;
   }
 }
