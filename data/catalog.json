@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-26T16:17:31.790Z",
+  "updatedAt": "2026-11-26T16:25:35.197Z",
   "products": [
     {
       "id": 1,
@@ -157,24 +157,36 @@
         "fa": "Granite"
       },
       "description": {
-        "tg": "Ранги Eco Paint Granite — 20 кг.",
-        "ru": "Краска Eco Paint Granite — 20 кг.",
-        "en": "Eco Paint Granite paint — 20 kg.",
-        "zh": "Eco Paint Granite paint — 20 kg.",
-        "fa": "Ранги Eco Paint Granite — 20 кг."
+        "tg": "эмульсия акриловий сафед сифати премиум барои дохили хона пешбини шудааст",
+        "en": "Premium quality white acrylic emulsion is intended for indoor use.",
+        "ru": "Высококачественная белая акриловая эмульсия предназначена для внутренних работ.",
+        "zh": "优质白色丙烯酸乳胶漆，适用于室内。",
+        "fa": "امولسیون اکریلیک سفید با کیفیت ممتاز برای استفاده در فضای داخلی طراحی شده است"
       },
       "category": {
-        "tg": "Эмулсия",
-        "ru": "Эмульсия",
-        "en": "Emulsion",
-        "zh": "乳胶漆",
-        "fa": "امولسیون"
+        "tg": "Эмулсия (премиум)",
+        "en": "Emulsion (premium)",
+        "fa": "امولسیون (پریمیوم)",
+        "zh": "乳液（高级）",
+        "ru": "Эмульсия (премиум)"
       },
       "image": "images/granite.jpg",
       "variants": [
         {
           "weight": 20,
-          "price": 0
+          "price": 95
+        },
+        {
+          "weight": 10,
+          "price": 55
+        },
+        {
+          "weight": 7,
+          "price": 31
+        },
+        {
+          "weight": 4,
+          "price": 25
         }
       ],
       "discount": 0,
