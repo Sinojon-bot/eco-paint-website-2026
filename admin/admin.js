@@ -574,10 +574,11 @@ async function autoPublishToPhone(list = products, attempts = 3) {
       const prepared = await publishCatalogToInternet(list);
       products = prepared;
       saveProducts();
-      setCloudStatus(`Автомат ба телефон рафт · ${products.length} маҳсулот. Телефонро нав кунед.`);
+      setCloudStatus(`✅ Ба телефон рафт · ${products.length} маҳсулот (автомат).`);
       return true;
     } catch (error) {
       lastError = error;
+      setCloudStatus(`Кӯшиш ${i + 1}/${attempts}: ${adminError(error)}`, true);
       await new Promise(resolve => setTimeout(resolve, 700 * (i + 1)));
     }
   }

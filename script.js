@@ -654,9 +654,13 @@ function catalogScore(list) {
   }, 0);
 }
 
-function applyRemoteProducts(list) {
+let cloudCatalogStarted = false;
+let cloudLive = false; // Firestore омад — digар catalog.json набояд боз нависад
+
+function applyRemoteProducts(list, source = "fallback") {
   if (!Array.isArray(list) || !list.length) return false;
-  // Интернет = ҳақиқат: телефон ва компютер ҳамеша якхела.
+  // Агар интернет (Firestore) аллакай омада бошад, файли кӯҳна (catalog.json) нанависад.
+  if (cloudLive && source !== "cloud") return false;
   products = list
     .map(item => {
       const product = upgradePlaceholderProduct(item);
@@ -666,7 +670,12 @@ function applyRemoteProducts(list) {
       return product;
     })
     .sort((a, b) => a.id - b.id);
-  localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(products));
+  if (source === "cloud") cloudLive = true;
+  try {
+    localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(products));
+  } catch (error) {
+    console.warn("catalog cache full", error);
+  }
   pruneCart();
   renderCategories();
   renderProducts();
@@ -675,23 +684,23 @@ function applyRemoteProducts(list) {
 }
 
 async function loadCatalogJsonFallback() {
+  if (cloudLive) return;
   try {
-    const response = await fetch(`data/catalog.json?v=19&_=${Date.now()}`, { cache: "no-store" });
-    if (!response.ok) return;
+    const response = await fetch(`data/catalog.json?v=24&_=${Date.now()}`, { cache: "no-store" });
+    if (!response.ok || cloudLive) return;
     const payload = await response.json();
+    if (cloudLive) return;
     const list = Array.isArray(payload) ? payload : payload?.products;
-    applyRemoteProducts(list);
+    applyRemoteProducts(list, "fallback");
   } catch (error) {
     console.warn("catalog.json unavailable", error);
   }
 }
 
-let cloudCatalogStarted = false;
-
 function startCloudCatalog() {
   if (!/^https?:$/.test(location.protocol)) return;
-  // Аввал catalog.json — телефон зуд мебинад, Firebase баъдтар.
-  loadCatalogJsonFallback();
+  // Аввал catalog.json — телефон зуд мебинад; Firestore баъд ҳақиқатро мегирад.
+  if (!cloudCatalogStarted) loadCatalogJsonFallback();
   if (!ecoPaintDb || cloudCatalogStarted) return;
   cloudCatalogStarted = true;
   let latestSnapshot = null;
@@ -701,17 +710,19 @@ function startCloudCatalog() {
     const list = latestSnapshot.docs.map(document => {
       const data = document.data() || {};
       delete data.syncKey;
+      delete data.updatedAt;
       return data;
     });
-    applyRemoteProducts(list);
+    applyRemoteProducts(list, "cloud");
   }
+  // Зинда: админ тағйир → телефон бе навкунӣ нав мешавад
   ecoPaintDb.collection("products").onSnapshot(snapshot => {
     latestSnapshot = snapshot;
     refreshCatalog();
   }, error => console.error("Cloud products failed", error));
 
   ecoPaintDb.collection("settings").doc("catalog").onSnapshot(document => {
-    initialized = document.exists && document.data().initialized === true;
+    initialized = document.exists && document.data()?.initialized === true;
     refreshCatalog();
   }, error => console.error("Cloud catalog state failed", error));
 
@@ -719,8 +730,18 @@ function startCloudCatalog() {
     if (!document.exists) return;
     const data = { ...document.data() };
     delete data.syncKey;
+    delete data.updatedAt;
     localStorage.setItem("ecoPaintPaymentSettings", JSON.stringify(data));
   }, error => console.error("Cloud settings failed", error));
+
+  // Вақте телефон боз мешавад — як бор аз сервер каш мекунад
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState !== "visible" || !ecoPaintDb) return;
+    ecoPaintDb.collection("products").get({ source: "server" }).then(snapshot => {
+      latestSnapshot = snapshot;
+      refreshCatalog();
+    }).catch(() => {});
+  });
 }
 
 window.startCloudCatalog = startCloudCatalog;

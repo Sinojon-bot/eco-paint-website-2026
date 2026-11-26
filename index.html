@@ -16,17 +16,17 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=21">
-  <link rel="stylesheet" href="language.css?v=21">
-  <link rel="stylesheet" href="features.css?v=21">
+  <link rel="stylesheet" href="style.css?v=24">
+  <link rel="stylesheet" href="language.css?v=24">
+  <link rel="stylesheet" href="features.css?v=24">
   <script>
     (function () {
-      var V = "21";
+      var V = "24";
       try {
-        ["ecoPaintProductsAutoV4","ecoPaintProductsAutoV3","ecoPaintProductsAutoV2","ecoPaintProductsAutoV1","ecoPaintProductsLiveV5"].forEach(function (k) {
-          localStorage.removeItem(k);
-        });
         if (localStorage.getItem("ecoPaintSiteV") !== V) {
+          ["ecoPaintProductsAutoV4","ecoPaintProductsAutoV3","ecoPaintProductsAutoV2","ecoPaintProductsAutoV1","ecoPaintProductsLiveV5"].forEach(function (k) {
+            localStorage.removeItem(k);
+          });
           localStorage.setItem("ecoPaintSiteV", V);
           if (!/[?&]fresh=1/.test(location.search)) {
             location.replace(location.pathname + "?fresh=1&v=" + V + "&t=" + Date.now());
@@ -170,7 +170,7 @@
     </section>
   </div>
 
-  <script src="script.js?v=21" defer></script>
+  <script src="script.js?v=24" defer></script>
   <script defer>
     (function () {
       function load(src) {
@@ -191,16 +191,17 @@
         if (typeof WALL_IMAGE_VARIANTS !== "undefined") return Promise.resolve();
         return load("wall-variants-data.js");
       };
-      window.addEventListener("load", async () => {
+      // Фавран Firebase — тағйироти админ бетаъхир ба телефон меояд
+      (async function bootCloud() {
         try {
           await load("https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js");
           await load("https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js");
-          await load("firebase-config.js?v=16");
+          await load("firebase-config.js?v=24");
           if (typeof startCloudCatalog === "function") startCloudCatalog();
         } catch (error) {
-          console.warn("Cloud sync deferred load failed", error);
+          console.warn("Cloud sync load failed", error);
         }
-      });
+      })();
     })();
   </script>
 </body>
