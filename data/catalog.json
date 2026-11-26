@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-26T16:15:16.436Z",
+  "updatedAt": "2026-11-26T16:17:10.728Z",
   "products": [
     {
       "id": 1,
@@ -112,28 +112,36 @@
         "fa": "Whitewall"
       },
       "description": {
-        "tg": "Ранги Eco Paint Whitewall — 20 кг.",
-        "ru": "Краска Eco Paint Whitewall — 20 кг.",
-        "en": "Eco Paint Whitewall paint — 20 kg.",
-        "zh": "Eco Paint Whitewall paint — 20 kg.",
-        "fa": "Ранги Eco Paint Whitewall — 20 кг."
+        "tg": "эмульсия сифати эконом бо нархи дастрас барои дохили хона пешбини шудааст",
+        "en": "Economy-grade emulsion paint is offered at an affordable price for indoor use.",
+        "zh": "经济型乳胶漆以实惠的价格提供室内装饰。",
+        "ru": "Эмульсия эконом-класса по доступной цене предназначена для внутренних работ.",
+        "fa": "رنگ روغنی با کیفیت اقتصادی و قیمت مناسب برای استفاده در فضای داخلی خانه عرضه می‌شود."
       },
       "category": {
-        "tg": "Эмулсия",
-        "ru": "Эмульсия",
-        "en": "Emulsion",
-        "zh": "乳胶漆",
-        "fa": "امولسیون"
+        "tg": "Эмулсия сифати (эконом)",
+        "zh": "乳液质量（经济型）",
+        "en": "Quality emulsion (economy)",
+        "ru": "Качество эмульсии (эконом)",
+        "fa": "امولسیون با کیفیت (اقتصادی)"
       },
       "image": "images/whitewall.jpg",
       "variants": [
         {
           "weight": 20,
-          "price": 0
+          "price": 75
+        },
+        {
+          "weight": 10,
+          "price": 45
+        },
+        {
+          "weight": 4,
+          "price": 21
         }
       ],
       "discount": 0,
-      "coverage": 8,
+      "coverage": 6,
       "colors": [
         "#ffffff",
         "#f5f2eb"
