@@ -36,24 +36,40 @@ button,input,textarea,select {
   font:inherit
 }
 
+/* Компютер = телефон: як намуди мобил дар ҳама ҷо */
 .app {
-  max-width:1180px;
+  width:min(430px,100%);
+  max-width:430px;
   margin:auto;
-  padding-bottom:85px
+  min-height:100vh;
+  padding-bottom:calc(92px + env(safe-area-inset-bottom,0px));
+  background:linear-gradient(180deg,#f7fbf8 0%,#eef6f0 55%,#e8f2eb 100%);
+  box-shadow:0 0 0 1px #d9e4db,0 24px 70px #113d2418
 }
 
 header {
-  height:78px;
-  padding:10px 3.5%;
-  display:flex;
+  height:auto;
+  padding:10px 3.5% 8px;
+  display:grid !important;
+  grid-template-columns:auto 1fr auto;
+  grid-template-areas:
+    "logo langs cart"
+    "search search search";
   align-items:center;
-  gap:14px;
+  row-gap:8px;
+  column-gap:8px;
   position:sticky;
   top:0;
   z-index:20;
-  background:#fffffff2;
+  backdrop-filter:blur(14px);
+  background:#fffffff5;
   border-bottom:1px solid var(--line)
 }
+
+header .logo { grid-area:logo; }
+header .language-picker { grid-area:langs; justify-self:end; }
+header .cartBtn { grid-area:cart; }
+header .search { grid-area:search; width:100%; min-width:0; }
 
 .logo {
   min-width:90px;
@@ -154,8 +170,8 @@ header {
 .grid {
   padding:0 3.5% 25px;
   display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:14px
+  grid-template-columns:repeat(2,1fr);
+  gap:11px
 }
 
 .card {

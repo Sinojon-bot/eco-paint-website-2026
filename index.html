@@ -16,19 +16,16 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=19">
-  <link rel="stylesheet" href="language.css?v=19">
-  <link rel="stylesheet" href="features.css?v=19">
+  <link rel="stylesheet" href="style.css?v=20">
+  <link rel="stylesheet" href="language.css?v=20">
+  <link rel="stylesheet" href="features.css?v=20">
   <script>
-    // Агар телефон нусхаи кӯҳнаро нигоҳ дошта бошад — як бор нав мекунад.
     (function () {
-      var V = "19";
+      var V = "20";
       try {
-        // Каталоги кӯҳнаи ҳар дастгоҳро пок кун — ҳама аз интернет мегиранд.
-        localStorage.removeItem("ecoPaintProductsAutoV4");
-        localStorage.removeItem("ecoPaintProductsAutoV3");
-        localStorage.removeItem("ecoPaintProductsAutoV2");
-        localStorage.removeItem("ecoPaintProductsAutoV1");
+        ["ecoPaintProductsAutoV4","ecoPaintProductsAutoV3","ecoPaintProductsAutoV2","ecoPaintProductsAutoV1","ecoPaintProductsLiveV5"].forEach(function (k) {
+          localStorage.removeItem(k);
+        });
         if (localStorage.getItem("ecoPaintSiteV") !== V) {
           localStorage.setItem("ecoPaintSiteV", V);
           if (!/[?&]fresh=1/.test(location.search)) {
@@ -173,7 +170,7 @@
     </section>
   </div>
 
-  <script src="script.js?v=19" defer></script>
+  <script src="script.js?v=20" defer></script>
   <script defer>
     (function () {
       function load(src) {
