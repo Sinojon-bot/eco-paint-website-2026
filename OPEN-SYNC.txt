@@ -1,27 +1,12 @@
-ЯК БОР — баъд ҳама чиз АВТОМАТ мешавад
+ДИГАР Rules лозим НЕСТ
 
-Вақте админро тағйир медиҳӣ, худаш ба телефон меравад.
-Танҳо ЯК МАРОТИБА инро кун:
+Тағйироти админ худаш ба телефон меравад (тавассути GitHub).
 
-1) Кушо: https://console.firebase.google.com/
-2) Лоиҳа: eco-paint
-3) Build → Firestore Database → Rules
-4) ҲАМА матни кӯҳнаро пок кун, инро гузор:
+Чӣ кор кунӣ:
+1) Админ: https://sinojon-bot.github.io/eco-paint-website-2026/admin/
+2) Ворид шав: admin / 12345
+3) Алиш кун → «Нигоҳ доштан» ё «Фиристодан ба интернет»
+4) Вақте мебинии «Ба телефон рафт» — телефонро нав кун:
+   https://sinojon-bot.github.io/eco-paint-website-2026/phone.html
 
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /{document=**} {
-      allow read, write: if true;
-    }
-  }
-}
-
-5) Тугмаи Publish / Опубликовать
-
-БАЪД:
-Админ → тағйир → Нигоҳ доштан
-→ худаш ба интернет меравад
-→ телефонро нав кун — ҳамонро мебинӣ
-
-Дигар чизе лозим нест.
+Агар сурх хато дидӣ: Ctrl+F5 дар админ, боз «Фиристодан ба интернет».

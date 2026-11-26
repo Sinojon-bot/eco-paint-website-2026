@@ -369,11 +369,16 @@ function escapeHTML(value) {
 
 function adminError(error) {
   const code = error?.code || "";
+  const message = error?.message || "";
+  if (message.includes("NO_GITHUB_TOKEN") || message.includes("GitHub write 401") || message.includes("GitHub write 403")) {
+    return "Пайвасти GitHub нест. Саҳифаро нав кунед (Ctrl+F5) ва боз «Фиристодан ба интернет» занед.";
+  }
   if (code.includes("permission-denied")) {
-    return "ЯК БОР Rules-ро Publish кун (файли OPEN-SYNC.txt). Баъд тағйирот худаш ба телефон меравад. Маълумоти ту нест нашуд.";
+    // Firebase Rules баста — аммо GitHub sync бояд кор кунад
+    return "Firebase Rules баста аст; кӯшиши дигар (GitHub)… Агар боз хато — Ctrl+F5.";
   }
   if (code.includes("unavailable") || code.includes("network")) return "Сервер дастрас нест. Интернетро санҷед; тағйирот ҳанӯз сабт нашуд.";
-  return error?.message || "Амал иҷро нашуд. Боз кӯшиш кунед.";
+  return message || "Амал иҷро нашуд. Боз кӯшиш кунед.";
 }
 
 function setCloudStatus(message, isError = false) {
@@ -528,8 +533,60 @@ async function initializeCatalog(items) {
   cloudCatalogNeedsSeed = false;
 }
 
+function utf8ToBase64(text) {
+  const bytes = new TextEncoder().encode(text);
+  let binary = "";
+  bytes.forEach(b => { binary += String.fromCharCode(b); });
+  return btoa(binary);
+}
+
+// Синк бе Firebase Rules: каталогро ба GitHub менависад → телефон мехонад
+async function publishCatalogToGitHub(list) {
+  const token = localStorage.getItem("ecoPaintGithubToken") || "";
+  if (!token) throw new Error("NO_GITHUB_TOKEN");
+  const prepared = [];
+  for (const item of list) {
+    prepared.push(await prepareProductForCloud(item));
+  }
+  const api = "https://api.github.com/repos/Sinojon-bot/eco-paint-website-2026/contents/data/catalog.json";
+  const headers = {
+    Authorization: `Bearer ${token}`,
+    Accept: "application/vnd.github+json",
+    "Content-Type": "application/json",
+    "X-GitHub-Api-Version": "2022-11-28"
+  };
+  let sha;
+  const existing = await fetch(api, { headers });
+  if (existing.ok) {
+    const body = await existing.json();
+    sha = body.sha;
+  } else if (existing.status !== 404) {
+    throw new Error(`GitHub read ${existing.status}`);
+  }
+  const payload = {
+    updatedAt: new Date().toISOString(),
+    products: prepared.map(({ cloudId, ...rest }) => rest)
+  };
+  const put = await fetch(api, {
+    method: "PUT",
+    headers,
+    body: JSON.stringify({
+      message: `Admin catalog sync · ${prepared.length} products`,
+      content: utf8ToBase64(JSON.stringify(payload, null, 2)),
+      sha,
+      branch: "main"
+    })
+  });
+  if (!put.ok) {
+    const errText = await put.text();
+    throw new Error(`GitHub write ${put.status}: ${errText.slice(0, 180)}`);
+  }
+  localStorage.setItem("ecoPaintLastSyncOk", String(Date.now()));
+  return prepared;
+}
+
 // Тағйирот ба интернет → телефон (автомат)
-async function publishCatalogToInternet(list) {
+async function publishCatalogToFirestore(list) {
   if (!ecoPaintDb) {
     throw new Error("Firebase бор нашуд. Саҳифаро нав кунед.");
   }
@@ -566,8 +623,32 @@ async function publishCatalogToInternet(list) {
   return prepared;
 }
 
+async function publishCatalogToInternet(list) {
+  // 1) GitHub — кор мекунад бе Rules
+  // 2) Firestore — агар Rules кушода бошад, зиндатар
+  let prepared = null;
+  let githubError = null;
+  let firestoreError = null;
+  try {
+    prepared = await publishCatalogToGitHub(list);
+  } catch (error) {
+    githubError = error;
+  }
+  if (ecoPaintDb) {
+    try {
+      prepared = await publishCatalogToFirestore(list);
+    } catch (error) {
+      firestoreError = error;
+    }
+  }
+  if (prepared) return prepared;
+  if (githubError && githubError.message !== "NO_GITHUB_TOKEN") throw githubError;
+  if (firestoreError) throw firestoreError;
+  throw new Error("Firebase бор нашуд. Саҳифаро нав кунед.");
+}
+
 async function autoPublishToPhone(list = products, attempts = 3) {
-  if (!ecoPaintDb || !canEditLocally()) return false;
+  if (!canEditLocally()) return false;
   let lastError = null;
   for (let i = 0; i < attempts; i += 1) {
     try {
@@ -1226,9 +1307,9 @@ if (location.protocol === "file:") {
   setCloudStatus("Firebase ҳоло омода нест — саҳифаро нав кунед.", true);
 }
 
-// Агар як бор Rules Publish нашуда бошад, ҳар 20 сония боз кӯшиш мекунад.
+// Агар sync қатъ шуда бошад, ҳар 20 сония боз кӯшиш мекунад (GitHub ё Firebase).
 setInterval(() => {
-  if (!canEditLocally() || !ecoPaintDb) return;
+  if (!canEditLocally()) return;
   const lastOk = Number(localStorage.getItem("ecoPaintLastSyncOk") || 0);
   if (Date.now() - lastOk < 15000) return;
   autoPublishToPhone(products, 1).catch(() => {});

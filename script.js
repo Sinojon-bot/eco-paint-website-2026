@@ -685,15 +685,22 @@ function applyRemoteProducts(list, source = "fallback") {
 
 async function loadCatalogJsonFallback() {
   if (cloudLive) return;
-  try {
-    const response = await fetch(`data/catalog.json?v=24&_=${Date.now()}`, { cache: "no-store" });
-    if (!response.ok || cloudLive) return;
-    const payload = await response.json();
+  const urls = [
+    `https://raw.githubusercontent.com/Sinojon-bot/eco-paint-website-2026/main/data/catalog.json?t=${Date.now()}`,
+    `data/catalog.json?v=25&_=${Date.now()}`
+  ];
+  for (const url of urls) {
     if (cloudLive) return;
-    const list = Array.isArray(payload) ? payload : payload?.products;
-    applyRemoteProducts(list, "fallback");
-  } catch (error) {
-    console.warn("catalog.json unavailable", error);
+    try {
+      const response = await fetch(url, { cache: "no-store" });
+      if (!response.ok) continue;
+      const payload = await response.json();
+      if (cloudLive) return;
+      const list = Array.isArray(payload) ? payload : payload?.products;
+      if (applyRemoteProducts(list, "fallback")) return;
+    } catch (error) {
+      console.warn("catalog load failed", url, error);
+    }
   }
 }
 
