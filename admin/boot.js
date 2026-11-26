@@ -52,7 +52,7 @@
     }
 
     await loadScript("../firebase-config.js");
-    await loadScript("admin.js?v=14");
+    await loadScript("admin.js?v=16");
 
     window.ecoPaintFirebaseReady = true;
     window.dispatchEvent(new CustomEvent("ecoPaintFirebaseReady", {

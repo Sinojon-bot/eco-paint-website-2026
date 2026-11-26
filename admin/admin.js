@@ -22,7 +22,7 @@ const DEFAULT_PRODUCTS = [
       "امولسیون اکریلیک فوق‌سفید Eco Paint СНЕЖКА برای دیوار و سقف. برای کار داخلی و خارجی."
     ],
     ["Эмулсия", "Эмульсия", "Emulsion", "乳胶漆", "امولسیون"],
-    "images/sniezhka.jpg",
+    "images/sniezhka-sm.jpg",
     [[10, 75], [20, 140]],
     9,
     ["#ffffff", "#f7f4ef", "#e8dfd0", "#d5c4a8"]
@@ -256,8 +256,8 @@ function normalizeCatalogList(list) {
         ? original.variants.map(variant => ({ ...variant }))
         : [{ weight: 10, price: 75 }, { weight: 20, price: 140 }];
     }
-    if (Number(product.id) === 1 && /images\/interior\.(webp|png)$/i.test(String(product.image || ""))) {
-      product.image = "images/sniezhka.jpg";
+    if (Number(product.id) === 1 && /images\/(interior\.(webp|png)|sniezhka\.jpg)$/i.test(String(product.image || ""))) {
+      product.image = "images/sniezhka-sm.jpg";
     }
     return product;
   });

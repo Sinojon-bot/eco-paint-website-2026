@@ -365,7 +365,7 @@ const DEFAULT_PRODUCTS = [
       zh: "乳胶漆",
       fa: "امولسیون"
     },
-    image: "images/sniezhka.jpg",
+    image: "images/sniezhka-sm.jpg",
     variants: [{ weight: 10, price: 75 }, { weight: 20, price: 140 }],
     coverage: 9,
     colors: ["#ffffff", "#f7f4ef", "#e8dfd0", "#d5c4a8"]
@@ -593,8 +593,8 @@ function loadProducts() {
             ? original.variants.map(variant => ({ ...variant }))
             : [{ weight: 10, price: 75 }, { weight: 20, price: 140 }];
         }
-        if (Number(product.id) === 1 && /images\/interior\.(webp|png)$/i.test(String(product.image || ""))) {
-          product.image = "images/sniezhka.jpg";
+        if (Number(product.id) === 1 && /images\/(interior\.(webp|png)|sniezhka\.jpg)$/i.test(String(product.image || ""))) {
+          product.image = "images/sniezhka-sm.jpg";
         }
         return product;
       });
@@ -704,10 +704,14 @@ async function loadCatalogJsonFallback() {
   }
 }
 
+let cloudCatalogStarted = false;
+
 function startCloudCatalog() {
   if (!/^https?:$/.test(location.protocol)) return;
+  // Аввал catalog.json — телефон зуд мебинад, Firebase баъдтар.
   loadCatalogJsonFallback();
-  if (!ecoPaintDb) return;
+  if (!ecoPaintDb || cloudCatalogStarted) return;
+  cloudCatalogStarted = true;
   let latestSnapshot = null;
   let initialized = false;
   function refreshCatalog() {
@@ -736,6 +740,8 @@ function startCloudCatalog() {
     localStorage.setItem("ecoPaintPaymentSettings", JSON.stringify(data));
   }, error => console.error("Cloud settings failed", error));
 }
+
+window.startCloudCatalog = startCloudCatalog;
 
 function tr(key) {
   return TEXT[language][key];
@@ -1015,12 +1021,14 @@ function renderWelcomeBuckets() {
   const holder = $("#welcomeBuckets");
   if (!holder) return;
   const accents = ["#13a653", "#347ff0", "#ff7a3d", "#f3c431"];
-  holder.innerHTML = products.slice(0, 4).map((product, index) => {
+  // Дар телефон танҳо 3 сурат — сабуктар медрояд.
+  const count = window.matchMedia("(max-width:760px)").matches ? 3 : 4;
+  holder.innerHTML = products.slice(0, count).map((product, index) => {
     const image = productImage(product);
     return `
-    <div class="welcome-bucket" style="--welcome-paint:${accents[index]};--welcome-delay:${1 + index * .24}s">
-      <img src="${escapeHTML(image)}" alt="">
-      <img class="welcome-real-lid" src="${escapeHTML(image)}" alt="">
+    <div class="welcome-bucket" style="--welcome-paint:${accents[index]};--welcome-delay:${0.35 + index * .18}s">
+      <img src="${escapeHTML(image)}" alt="" loading="${index ? "lazy" : "eager"}" decoding="async">
+      <img class="welcome-real-lid" src="${escapeHTML(image)}" alt="" loading="lazy" decoding="async">
       <i class="welcome-pool"></i>
       <i class="welcome-drop d1"></i>
       <i class="welcome-drop d2"></i>
@@ -1210,6 +1218,9 @@ async function checkReceipt(file, expectedAmount) {
   const settings = paymentSettings();
   if (!settings.receiptCheckEnabled) return true;
 
+  if (typeof window.ecoPaintLoadTesseract === "function") {
+    await window.ecoPaintLoadTesseract();
+  }
   if (!window.Tesseract) {
     throw new Error("OCR library did not load");
   }
@@ -1986,7 +1997,16 @@ $("#profileForm").onsubmit = event => {
   closeProfileEditor();
 };
 $("#calculatorBtn").onclick = showCalculator;
-$("#visualizerBtn").onclick = () => showWallStudio();
+$("#visualizerBtn").onclick = async () => {
+  try {
+    if (typeof window.ecoPaintLoadWallVariants === "function") {
+      await window.ecoPaintLoadWallVariants();
+    }
+  } catch (error) {
+    console.warn("Wall variants load failed", error);
+  }
+  showWallStudio();
+};
 $("#openCart").onclick = $("#cartNav").onclick = showCart;
 $("#close").onclick = () => $("#overlay").classList.add("hidden");
 $("#overlay").onclick = event => {

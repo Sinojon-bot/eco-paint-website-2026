@@ -13,9 +13,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=15">
-  <link rel="stylesheet" href="language.css?v=15">
-  <link rel="stylesheet" href="features.css?v=15">
+  <link rel="stylesheet" href="style.css?v=16">
+  <link rel="stylesheet" href="language.css?v=16">
+  <link rel="stylesheet" href="features.css?v=16">
 </head>
 <body>
   <main class="app">
@@ -162,11 +162,38 @@
     </section>
   </div>
 
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-  <script src="firebase-config.js?v=13"></script>
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-  <script src="wall-variants-data.js"></script>
-  <script src="script.js?v=14"></script>
+  <script src="script.js?v=16" defer></script>
+  <script defer>
+    (function () {
+      function load(src) {
+        return new Promise((resolve, reject) => {
+          const s = document.createElement("script");
+          s.src = src;
+          s.async = true;
+          s.onload = resolve;
+          s.onerror = reject;
+          document.head.appendChild(s);
+        });
+      }
+      window.ecoPaintLoadTesseract = function () {
+        if (window.Tesseract) return Promise.resolve();
+        return load("https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js");
+      };
+      window.ecoPaintLoadWallVariants = function () {
+        if (typeof WALL_IMAGE_VARIANTS !== "undefined") return Promise.resolve();
+        return load("wall-variants-data.js");
+      };
+      window.addEventListener("load", async () => {
+        try {
+          await load("https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js");
+          await load("https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js");
+          await load("firebase-config.js?v=16");
+          if (typeof startCloudCatalog === "function") startCloudCatalog();
+        } catch (error) {
+          console.warn("Cloud sync deferred load failed", error);
+        }
+      });
+    })();
+  </script>
 </body>
 </html>
