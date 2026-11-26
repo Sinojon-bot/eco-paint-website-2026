@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-26T16:35:08.099Z",
+  "updatedAt": "2026-11-26T16:36:03.875Z",
   "products": [
     {
       "id": 1,
@@ -353,28 +353,40 @@
         "fa": "Arezoo"
       },
       "description": {
-        "tg": "Ранги Eco Paint Arezoo — 20 кг.",
-        "ru": "Краска Eco Paint Arezoo — 20 кг.",
-        "en": "Eco Paint Arezoo paint — 20 kg.",
-        "zh": "Eco Paint Arezoo paint — 20 kg.",
-        "fa": "Ранги Eco Paint Arezoo — 20 кг."
+        "tg": "эмульсия акриловий сафед сифати премиум барои дохили хона пешбини шудааст",
+        "en": "Premium quality white acrylic emulsion is intended for indoor use.",
+        "ru": "Высококачественная белая акриловая эмульсия предназначена для внутренних работ.",
+        "fa": "امولسیون اکریلیک سفید با کیفیت عالی برای استفاده در داخل خانه طراحی شده است.",
+        "zh": "这款优质白色丙烯酸乳胶漆专为室内使用而设计。"
       },
       "category": {
-        "tg": "Эмулсия",
-        "ru": "Эмульсия",
-        "en": "Emulsion",
-        "zh": "乳胶漆",
-        "fa": "امولسیون"
+        "tg": "Эмулсия (премиум)",
+        "en": "Emulsion (premium)",
+        "fa": "امولسیون (پرمیوم)",
+        "zh": "乳液（高级）",
+        "ru": "Эмульсия (премиум)"
       },
       "image": "images/arezoo.jpg",
       "variants": [
         {
           "weight": 20,
-          "price": 0
+          "price": 95
+        },
+        {
+          "weight": 10,
+          "price": 55
+        },
+        {
+          "weight": 7,
+          "price": 31
+        },
+        {
+          "weight": 4,
+          "price": 25
         }
       ],
       "discount": 0,
-      "coverage": 8,
+      "coverage": 6,
       "colors": [
         "#ffffff",
         "#f7f4ef",
