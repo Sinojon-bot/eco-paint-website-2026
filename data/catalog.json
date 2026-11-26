@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-26T16:32:50.516Z",
+  "updatedAt": "2026-11-26T16:35:08.099Z",
   "products": [
     {
       "id": 1,
@@ -303,28 +303,40 @@
         "fa": "ПРОФЕССИОНАЛ"
       },
       "description": {
-        "tg": "Ранги касбии Eco Paint ПРОФЕССИОНАЛ — 20 кг.",
-        "ru": "Профессиональная краска Eco Paint ПРОФЕССИОНАЛ — 20 кг.",
-        "en": "Eco Paint PROFESSIONAL paint — 20 kg.",
-        "zh": "Eco Paint PROFESSIONAL paint — 20 kg.",
-        "fa": "Ранги касбии Eco Paint ПРОФЕССИОНАЛ — 20 кг."
+        "tg": "эмульсия акриловий сафед сифати премиум барои дохили хона пешбини шудааст",
+        "zh": "这款优质白色丙烯酸乳胶漆专为室内使用而设计。",
+        "en": "Premium quality white acrylic emulsion is intended for indoor use.",
+        "ru": "Высококачественная белая акриловая эмульсия предназначена для внутренних работ.",
+        "fa": "امولسیون اکریلیک سفید با کیفیت عالی برای استفاده در فضای داخلی طراحی شده است"
       },
       "category": {
-        "tg": "Касбӣ",
-        "ru": "Профессиональные",
-        "en": "Professional",
-        "zh": "专业系列",
-        "fa": "حرفه‌ای"
+        "tg": "Эмулсия (премиум)",
+        "fa": "امولسیون (پریمیوم)",
+        "zh": "乳液（高级）",
+        "en": "Emulsion (premium)",
+        "ru": "Эмульсия (премиум)"
       },
       "image": "images/professional.jpg",
       "variants": [
         {
           "weight": 20,
-          "price": 0
+          "price": 95
+        },
+        {
+          "weight": 10,
+          "price": 55
+        },
+        {
+          "weight": 7,
+          "price": 31
+        },
+        {
+          "weight": 4,
+          "price": 25
         }
       ],
       "discount": 0,
-      "coverage": 8,
+      "coverage": 6,
       "colors": [
         "#f5f2eb",
         "#e0d4c2",
