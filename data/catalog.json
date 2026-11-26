@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-26T16:28:30.068Z",
+  "updatedAt": "2026-11-26T16:29:48.633Z",
   "products": [
     {
       "id": 1,
@@ -253,18 +253,18 @@
         "fa": "TERACCO"
       },
       "description": {
-        "tg": "Ранги Eco Paint TERACCO — 20 кг.",
-        "ru": "Краска Eco Paint TERACCO — 20 кг.",
-        "en": "Eco Paint TERACCO paint — 20 kg.",
-        "zh": "Eco Paint TERACCO paint — 20 kg.",
-        "fa": "Ранги Eco Paint TERACCO — 20 кг."
+        "tg": "эмульсия",
+        "zh": "乳液",
+        "ru": "Эмульсия",
+        "fa": "امولسیون",
+        "en": "emulsion"
       },
       "category": {
-        "tg": "Эмулсия",
-        "ru": "Эмульсия",
-        "en": "Emulsion",
-        "zh": "乳胶漆",
-        "fa": "امولسیون"
+        "tg": "Эмулсия (премиум)",
+        "zh": "乳液（高级）",
+        "en": "Emulsion (premium)",
+        "ru": "Эмульсия (премиум)",
+        "fa": "امولسیون (پریمیوم)"
       },
       "image": "images/teracco.jpg",
       "variants": [
