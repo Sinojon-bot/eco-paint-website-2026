@@ -343,142 +343,460 @@ const PLACEHOLDER_PRODUCT_NAMES = new Set([
 
 const DEFAULT_PRODUCTS = [
   {
-    id: 1,
-    name: {
-      tg: "СНЕЖКА",
-      ru: "СНЕЖКА",
-      en: "SNEZHKA",
-      zh: "СНЕЖКА 超白漆",
-      fa: "СНЕЖКА"
+    "id": 1,
+    "name": {
+      "tg": "СНЕЖКА",
+      "ru": "СНЕЖКА",
+      "en": "СНЕЖКА",
+      "zh": "СНЕЖКА 超白漆",
+      "fa": "СНЕЖКА"
     },
-    description: {
-      tg: "Эмулсияи акрилии суперсафед Eco Paint СНЕЖКА барои девор ва шифт. Барои корҳои дарунӣ ва берунӣ.",
-      ru: "Супербелая акриловая водоэмульсия Eco Paint СНЕЖКА для стен и потолков. Для внутренних и наружных работ.",
-      en: "Eco Paint SNEZHKA super-white acrylic emulsion for walls and ceilings. Interior and exterior.",
-      zh: "Eco Paint СНЕЖКА 超白丙烯酸乳胶漆，适用于墙面与天花板，室内外皆可。",
-      fa: "امولسیون اکریلیک فوق‌سفید Eco Paint СНЕЖКА برای دیوار و سقف. برای کار داخلی و خارجی."
+    "description": {
+      "tg": "Эмулсияи акрилии суперсафед Eco Paint СНЕЖКА барои девор ва шифт.",
+      "ru": "Супербелая акриловая водоэмульсия Eco Paint СНЕЖКА для стен и потолков.",
+      "en": "Eco Paint SNEZHKA super-white acrylic emulsion for walls and ceilings.",
+      "zh": "Eco Paint SNEZHKA super-white acrylic emulsion for walls and ceilings.",
+      "fa": "Эмулсияи акрилии суперсафед Eco Paint СНЕЖКА барои девор ва шифт."
     },
-    category: {
-      tg: "Эмулсия",
-      ru: "Эмульсия",
-      en: "Emulsion",
-      zh: "乳胶漆",
-      fa: "امولسیون"
+    "category": {
+      "tg": "Эмулсия",
+      "ru": "Эмульсия",
+      "en": "Emulsion",
+      "zh": "乳胶漆",
+      "fa": "امولسیون"
     },
-    image: "images/sniezhka-sm.jpg",
-    variants: [{ weight: 10, price: 75 }, { weight: 20, price: 140 }],
-    coverage: 9,
-    colors: ["#ffffff", "#f7f4ef", "#e8dfd0", "#d5c4a8"]
+    "image": "images/sniezhka.jpg",
+    "variants": [
+      {
+        "weight": 20,
+        "price": 0
+      }
+    ],
+    "discount": 0,
+    "coverage": 9,
+    "colors": [
+      "#ffffff",
+      "#f7f4ef",
+      "#e8dfd0",
+      "#d5c4a8"
+    ]
   },
   {
-    id: 2,
-    name: {
-      tg: "Eco Facade",
-      ru: "Eco Facade",
-      en: "Eco Facade",
-      zh: "Eco Facade 外墙漆",
-      fa: "Eco Facade"
+    "id": 2,
+    "name": {
+      "tg": "Радуга Малер",
+      "ru": "Радуга Малер",
+      "en": "Радуга Малер",
+      "zh": "Радуга Малер",
+      "fa": "Радуга Малер"
     },
-    description: {
-      tg: "Ранги фасадӣ барои беруни хона. Ба борон, офтоб ва гармӣ тобовар.",
-      ru: "Фасадная краска для наружных работ. Устойчива к дождю, солнцу и жаре.",
-      en: "Exterior facade paint. Weather-resistant against rain, sun and heat.",
-      zh: "外墙涂料，耐雨、耐晒、耐热。",
-      fa: "رنگ نما برای فضای بیرونی. مقاوم در برابر باران، آفتاب و گرما."
+    "description": {
+      "tg": "Ранги Eco Paint Радуга Малер — 20 кг.",
+      "ru": "Краска Eco Paint Радуга Малер — 20 кг.",
+      "en": "Eco Paint Raduga Maler paint — 20 kg.",
+      "zh": "Eco Paint Raduga Maler paint — 20 kg.",
+      "fa": "Ранги Eco Paint Радуга Малер — 20 кг."
     },
-    category: { tg: "Эмулсия", ru: "Эмульсия", en: "Emulsion", zh: "乳胶漆", fa: "امولسیون" },
-    image: "images/facade.webp",
-    variants: [{ weight: 4, price: 58 }, { weight: 10, price: 118 }, { weight: 20, price: 215 }],
-    coverage: 7,
-    colors: ["#f2efe8", "#d8c8a8", "#a8b59a", "#7d8fa3"]
+    "category": {
+      "tg": "Эмулсия",
+      "ru": "Эмульсия",
+      "en": "Emulsion",
+      "zh": "乳胶漆",
+      "fa": "امولسیون"
+    },
+    "image": "images/raduga-maler.jpg",
+    "variants": [
+      {
+        "weight": 20,
+        "price": 0
+      }
+    ],
+    "discount": 0,
+    "coverage": 8,
+    "colors": [
+      "#ffffff",
+      "#f7f4ef",
+      "#e8dfd0"
+    ]
   },
   {
-    id: 3,
-    name: {
-      tg: "Eco Decorative",
-      ru: "Eco Decorative",
-      en: "Eco Decorative",
-      zh: "Eco Decorative 装饰漆",
-      fa: "Eco Decorative"
+    "id": 3,
+    "name": {
+      "tg": "Whitewall",
+      "ru": "Whitewall",
+      "en": "Whitewall",
+      "zh": "Whitewall",
+      "fa": "Whitewall"
     },
-    description: {
-      tg: "Пӯшиши декоративӣ бо фактураи зебо барои ҳуҷраҳои меҳмонӣ ва хобгоҳ.",
-      ru: "Декоративное покрытие с красивой фактурой для гостиных и спален.",
-      en: "Decorative textured finish for living rooms and bedrooms.",
-      zh: "装饰纹理涂料，适合客厅与卧室。",
-      fa: "پوشش تزئینی با بافت زیبا برای پذیرایی و اتاق خواب."
+    "description": {
+      "tg": "Ранги Eco Paint Whitewall — 20 кг.",
+      "ru": "Краска Eco Paint Whitewall — 20 кг.",
+      "en": "Eco Paint Whitewall paint — 20 kg.",
+      "zh": "Eco Paint Whitewall paint — 20 kg.",
+      "fa": "Ранги Eco Paint Whitewall — 20 кг."
     },
-    category: { tg: "Декоративӣ", ru: "Декоративные", en: "Decorative", zh: "装饰涂料", fa: "تزئینی" },
-    image: "images/decorative.webp",
-    variants: [{ weight: 4, price: 85 }, { weight: 10, price: 175 }, { weight: 20, price: 310 }],
-    coverage: 5,
-    colors: ["#efe6d8", "#c9b29a", "#9caf88", "#76556f"]
+    "category": {
+      "tg": "Эмулсия",
+      "ru": "Эмульсия",
+      "en": "Emulsion",
+      "zh": "乳胶漆",
+      "fa": "امولسیون"
+    },
+    "image": "images/whitewall.jpg",
+    "variants": [
+      {
+        "weight": 20,
+        "price": 0
+      }
+    ],
+    "discount": 0,
+    "coverage": 8,
+    "colors": [
+      "#ffffff",
+      "#f5f2eb"
+    ]
   },
   {
-    id: 4,
-    name: {
-      tg: "Eco Primer",
-      ru: "Eco Primer",
-      en: "Eco Primer",
-      zh: "Eco Primer 底漆",
-      fa: "Eco Primer"
+    "id": 4,
+    "name": {
+      "tg": "Granite",
+      "ru": "Granite",
+      "en": "Granite",
+      "zh": "Granite",
+      "fa": "Granite"
     },
-    description: {
-      tg: "Грунтовкаи акрилӣ барои омода кардани девор пеш аз рангкунӣ.",
-      ru: "Акриловая грунтовка для подготовки стен перед покраской.",
-      en: "Acrylic primer to prepare walls before painting.",
-      zh: "丙烯酸底漆，涂装前打底用。",
-      fa: "آستر اکریلیک برای آماده‌سازی دیوار قبل از رنگ‌کاری."
+    "description": {
+      "tg": "Ранги Eco Paint Granite — 20 кг.",
+      "ru": "Краска Eco Paint Granite — 20 кг.",
+      "en": "Eco Paint Granite paint — 20 kg.",
+      "zh": "Eco Paint Granite paint — 20 kg.",
+      "fa": "Ранги Eco Paint Granite — 20 кг."
     },
-    category: { tg: "Грунтовка", ru: "Грунтовка", en: "Primer", zh: "底漆", fa: "آستر" },
-    image: "images/primer.webp",
-    variants: [{ weight: 4, price: 38 }, { weight: 10, price: 78 }, { weight: 20, price: 135 }],
-    coverage: 12,
-    colors: ["#ffffff", "#f3f1ec", "#e6e2d8"]
+    "category": {
+      "tg": "Эмулсия",
+      "ru": "Эмульсия",
+      "en": "Emulsion",
+      "zh": "乳胶漆",
+      "fa": "امولسیون"
+    },
+    "image": "images/granite.jpg",
+    "variants": [
+      {
+        "weight": 20,
+        "price": 0
+      }
+    ],
+    "discount": 0,
+    "coverage": 7,
+    "colors": [
+      "#e8e4dc",
+      "#c9c2b4",
+      "#8a8680"
+    ]
   },
   {
-    id: 5,
-    name: {
-      tg: "Eco PVA",
-      ru: "Eco PVA",
-      en: "Eco PVA",
-      zh: "Eco PVA 胶水",
-      fa: "Eco PVA"
+    "id": 5,
+    "name": {
+      "tg": "MAGMA",
+      "ru": "MAGMA",
+      "en": "MAGMA",
+      "zh": "MAGMA",
+      "fa": "MAGMA"
     },
-    description: {
-      tg: "Клейи универсалии ПВА барои чӯб, коғаз ва корҳои сохтмонӣ.",
-      ru: "Универсальный клей ПВА для дерева, бумаги и строительных работ.",
-      en: "Universal PVA adhesive for wood, paper and construction jobs.",
-      zh: "通用 PVA 胶，适用于木材、纸张与施工。",
-      fa: "چسب همه‌کاره PVA برای چوب، کاغذ و کارهای ساختمانی."
+    "description": {
+      "tg": "Ранги Eco Paint MAGMA — 20 кг.",
+      "ru": "Краска Eco Paint MAGMA — 20 кг.",
+      "en": "Eco Paint MAGMA paint — 20 kg.",
+      "zh": "Eco Paint MAGMA paint — 20 kg.",
+      "fa": "Ранги Eco Paint MAGMA — 20 кг."
     },
-    category: { tg: "Клей ПВА", ru: "Клей ПВА", en: "PVA glue", zh: "PVA 胶", fa: "چسب PVA" },
-    image: "images/pva.webp",
-    variants: [{ weight: 4, price: 42 }, { weight: 10, price: 88 }, { weight: 20, price: 155 }],
-    coverage: 8,
-    colors: ["#ffffff", "#f7f7f5"]
+    "category": {
+      "tg": "Эмулсия",
+      "ru": "Эмульсия",
+      "en": "Emulsion",
+      "zh": "乳胶漆",
+      "fa": "امولسیون"
+    },
+    "image": "images/magma.jpg",
+    "variants": [
+      {
+        "weight": 20,
+        "price": 0
+      }
+    ],
+    "discount": 0,
+    "coverage": 7,
+    "colors": [
+      "#f5f2eb",
+      "#d8c8a8",
+      "#a85a3a"
+    ]
   },
   {
-    id: 6,
-    name: {
-      tg: "Eco Professional",
-      ru: "Eco Professional",
-      en: "Eco Professional",
-      zh: "Eco Professional 专业漆",
-      fa: "Eco Professional"
+    "id": 6,
+    "name": {
+      "tg": "TERACCO",
+      "ru": "TERACCO",
+      "en": "TERACCO",
+      "zh": "TERACCO",
+      "fa": "TERACCO"
     },
-    description: {
-      tg: "Серияи касбӣ бо тобоварии баланд барои устоҳо ва корҳои калон.",
-      ru: "Профессиональная серия повышенной стойкости для мастеров и крупных работ.",
-      en: "Professional high-durability range for trades and large jobs.",
-      zh: "专业高耐久系列，适合工匠与大型工程。",
-      fa: "سری حرفه‌ای با دوام بالا برای استادکاران و پروژه‌های بزرگ."
+    "description": {
+      "tg": "Ранги Eco Paint TERACCO — 20 кг.",
+      "ru": "Краска Eco Paint TERACCO — 20 кг.",
+      "en": "Eco Paint TERACCO paint — 20 kg.",
+      "zh": "Eco Paint TERACCO paint — 20 kg.",
+      "fa": "Ранги Eco Paint TERACCO — 20 кг."
     },
-    category: { tg: "Касбӣ", ru: "Профессиональные", en: "Professional", zh: "专业系列", fa: "حرفه‌ای" },
-    image: "images/professional.webp",
-    variants: [{ weight: 4, price: 72 }, { weight: 10, price: 148 }, { weight: 20, price: 265 }],
-    coverage: 8,
-    colors: ["#f5f2eb", "#e0d4c2", "#88aacc", "#557a58"]
+    "category": {
+      "tg": "Эмулсия",
+      "ru": "Эмульсия",
+      "en": "Emulsion",
+      "zh": "乳胶漆",
+      "fa": "امولسیون"
+    },
+    "image": "images/teracco.jpg",
+    "variants": [
+      {
+        "weight": 20,
+        "price": 0
+      }
+    ],
+    "discount": 0,
+    "coverage": 7,
+    "colors": [
+      "#efe6d8",
+      "#c9b29a",
+      "#a07050"
+    ]
+  },
+  {
+    "id": 7,
+    "name": {
+      "tg": "ARESHKA",
+      "ru": "ARESHKA",
+      "en": "ARESHKA",
+      "zh": "ARESHKA",
+      "fa": "ARESHKA"
+    },
+    "description": {
+      "tg": "Ранги Eco Paint ARESHKA — 20 кг.",
+      "ru": "Краска Eco Paint ARESHKA — 20 кг.",
+      "en": "Eco Paint ARESHKA paint — 20 kg.",
+      "zh": "Eco Paint ARESHKA paint — 20 kg.",
+      "fa": "Ранги Eco Paint ARESHKA — 20 кг."
+    },
+    "category": {
+      "tg": "Эмулсия",
+      "ru": "Эмульсия",
+      "en": "Emulsion",
+      "zh": "乳胶漆",
+      "fa": "امولسیون"
+    },
+    "image": "images/areshka.jpg",
+    "variants": [
+      {
+        "weight": 20,
+        "price": 0
+      }
+    ],
+    "discount": 0,
+    "coverage": 8,
+    "colors": [
+      "#ffffff",
+      "#f3f1ec",
+      "#e6e2d8"
+    ]
+  },
+  {
+    "id": 8,
+    "name": {
+      "tg": "ПРОФЕССИОНАЛ",
+      "ru": "ПРОФЕССИОНАЛ",
+      "en": "ПРОФЕССИОНАЛ",
+      "zh": "ПРОФЕССИОНАЛ 专业漆",
+      "fa": "ПРОФЕССИОНАЛ"
+    },
+    "description": {
+      "tg": "Ранги касбии Eco Paint ПРОФЕССИОНАЛ — 20 кг.",
+      "ru": "Профессиональная краска Eco Paint ПРОФЕССИОНАЛ — 20 кг.",
+      "en": "Eco Paint PROFESSIONAL paint — 20 kg.",
+      "zh": "Eco Paint PROFESSIONAL paint — 20 kg.",
+      "fa": "Ранги касбии Eco Paint ПРОФЕССИОНАЛ — 20 кг."
+    },
+    "category": {
+      "tg": "Касбӣ",
+      "ru": "Профессиональные",
+      "en": "Professional",
+      "zh": "专业系列",
+      "fa": "حرفه‌ای"
+    },
+    "image": "images/professional.jpg",
+    "variants": [
+      {
+        "weight": 20,
+        "price": 0
+      }
+    ],
+    "discount": 0,
+    "coverage": 8,
+    "colors": [
+      "#f5f2eb",
+      "#e0d4c2",
+      "#88aacc"
+    ]
+  },
+  {
+    "id": 9,
+    "name": {
+      "tg": "Arezoo",
+      "ru": "Arezoo",
+      "en": "Arezoo",
+      "zh": "Arezoo",
+      "fa": "Arezoo"
+    },
+    "description": {
+      "tg": "Ранги Eco Paint Arezoo — 20 кг.",
+      "ru": "Краска Eco Paint Arezoo — 20 кг.",
+      "en": "Eco Paint Arezoo paint — 20 kg.",
+      "zh": "Eco Paint Arezoo paint — 20 kg.",
+      "fa": "Ранги Eco Paint Arezoo — 20 кг."
+    },
+    "category": {
+      "tg": "Эмулсия",
+      "ru": "Эмульсия",
+      "en": "Emulsion",
+      "zh": "乳胶漆",
+      "fa": "امولسیون"
+    },
+    "image": "images/arezoo.jpg",
+    "variants": [
+      {
+        "weight": 20,
+        "price": 0
+      }
+    ],
+    "discount": 0,
+    "coverage": 8,
+    "colors": [
+      "#ffffff",
+      "#f7f4ef",
+      "#e8dfd0"
+    ]
+  },
+  {
+    "id": 10,
+    "name": {
+      "tg": "PLATINUM",
+      "ru": "PLATINUM",
+      "en": "PLATINUM",
+      "zh": "PLATINUM",
+      "fa": "PLATINUM"
+    },
+    "description": {
+      "tg": "Ранги Eco Paint PLATINUM — 20 кг.",
+      "ru": "Краска Eco Paint PLATINUM — 20 кг.",
+      "en": "Eco Paint PLATINUM paint — 20 kg.",
+      "zh": "Eco Paint PLATINUM paint — 20 kg.",
+      "fa": "Ранги Eco Paint PLATINUM — 20 кг."
+    },
+    "category": {
+      "tg": "Эмулсия",
+      "ru": "Эмульсия",
+      "en": "Emulsion",
+      "zh": "乳胶漆",
+      "fa": "امولسیون"
+    },
+    "image": "images/platinum.jpg",
+    "variants": [
+      {
+        "weight": 20,
+        "price": 0
+      }
+    ],
+    "discount": 0,
+    "coverage": 9,
+    "colors": [
+      "#ffffff",
+      "#f0f0f2",
+      "#d0d4d8"
+    ]
+  },
+  {
+    "id": 11,
+    "name": {
+      "tg": "SCORZA",
+      "ru": "SCORZA",
+      "en": "SCORZA",
+      "zh": "SCORZA",
+      "fa": "SCORZA"
+    },
+    "description": {
+      "tg": "Ранги Eco Paint SCORZA — 20 кг.",
+      "ru": "Краска Eco Paint SCORZA — 20 кг.",
+      "en": "Eco Paint SCORZA paint — 20 kg.",
+      "zh": "Eco Paint SCORZA paint — 20 kg.",
+      "fa": "Ранги Eco Paint SCORZA — 20 кг."
+    },
+    "category": {
+      "tg": "Эмулсия",
+      "ru": "Эмульсия",
+      "en": "Emulsion",
+      "zh": "乳胶漆",
+      "fa": "امولسیون"
+    },
+    "image": "images/scorza.jpg",
+    "variants": [
+      {
+        "weight": 20,
+        "price": 0
+      }
+    ],
+    "discount": 0,
+    "coverage": 7,
+    "colors": [
+      "#efe6d8",
+      "#c9b29a",
+      "#8b6914"
+    ]
+  },
+  {
+    "id": 12,
+    "name": {
+      "tg": "REMALUX",
+      "ru": "REMALUX",
+      "en": "REMALUX",
+      "zh": "REMALUX",
+      "fa": "REMALUX"
+    },
+    "description": {
+      "tg": "Ранги Eco Paint REMALUX — 20 кг.",
+      "ru": "Краска Eco Paint REMALUX — 20 кг.",
+      "en": "Eco Paint REMALUX paint — 20 kg.",
+      "zh": "Eco Paint REMALUX paint — 20 kg.",
+      "fa": "Ранги Eco Paint REMALUX — 20 кг."
+    },
+    "category": {
+      "tg": "Эмулсия",
+      "ru": "Эмульсия",
+      "en": "Emulsion",
+      "zh": "乳胶漆",
+      "fa": "امولسیون"
+    },
+    "image": "images/remalux.jpg",
+    "variants": [
+      {
+        "weight": 20,
+        "price": 0
+      }
+    ],
+    "discount": 0,
+    "coverage": 8,
+    "colors": [
+      "#ffffff",
+      "#f7f4ef",
+      "#e8dfd0"
+    ]
   }
 ];
 
@@ -571,7 +889,7 @@ function upgradePlaceholderProduct(product) {
 }
 
 // V5: сайт аз интернет мегирад — телефон ва компютер якхела мешаванд.
-const PRODUCTS_STORAGE_KEY = "ecoPaintProductsLiveV5";
+const PRODUCTS_STORAGE_KEY = "ecoPaintProductsLiveV6";
 
 function loadProducts() {
   // Аввал defaults; баъд catalog.json / Firestore ҳамаро якхела мекунад.
@@ -581,8 +899,8 @@ function loadProducts() {
     if (Array.isArray(saved) && saved.length) {
       return saved.map(item => {
         const product = upgradePlaceholderProduct(item);
-        if (Number(product.id) === 1 && /images\/(interior\.(webp|png)|sniezhka\.jpg)$/i.test(String(product.image || ""))) {
-          product.image = "images/sniezhka-sm.jpg";
+        if (Number(product.id) === 1 && /images\/(interior\.(webp|png)|sniezhka-sm\.jpg)$/i.test(String(product.image || ""))) {
+          product.image = "images/sniezhka.jpg";
         }
         return product;
       });
@@ -664,8 +982,8 @@ function applyRemoteProducts(list, source = "fallback") {
   products = list
     .map(item => {
       const product = upgradePlaceholderProduct(item);
-      if (Number(product.id) === 1 && /images\/(interior\.(webp|png)|sniezhka\.jpg)$/i.test(String(product.image || ""))) {
-        product.image = "images/sniezhka-sm.jpg";
+      if (Number(product.id) === 1 && /images\/(interior\.(webp|png)|sniezhka-sm\.jpg)$/i.test(String(product.image || ""))) {
+        product.image = "images/sniezhka.jpg";
       }
       return product;
     })
@@ -687,7 +1005,7 @@ async function loadCatalogJsonFallback() {
   if (cloudLive) return;
   const urls = [
     `https://raw.githubusercontent.com/Sinojon-bot/eco-paint-website-2026/main/data/catalog.json?t=${Date.now()}`,
-    `data/catalog.json?v=25&_=${Date.now()}`
+    `data/catalog.json?v=27&_=${Date.now()}`
   ];
   for (const url of urls) {
     if (cloudLive) return;

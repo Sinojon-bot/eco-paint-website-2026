@@ -52,13 +52,13 @@
     }
 
     await loadScript("../firebase-config.js");
-    await loadScript("sync-config.js?v=26");
+    await loadScript("sync-config.js?v=27");
     try {
       if (window.ECO_PAINT_SYNC_TOKEN) {
         localStorage.setItem("ecoPaintGithubToken", window.ECO_PAINT_SYNC_TOKEN);
       }
     } catch (e) {}
-    await loadScript("admin.js?v=26");
+    await loadScript("admin.js?v=27");
     // cache bust boot itself via index.html ?v=
 
     window.ecoPaintFirebaseReady = true;
