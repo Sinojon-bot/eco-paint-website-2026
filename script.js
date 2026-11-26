@@ -1018,24 +1018,7 @@ function renderProducts() {
 }
 
 function renderWelcomeBuckets() {
-  const holder = $("#welcomeBuckets");
-  if (!holder) return;
-  const accents = ["#13a653", "#347ff0", "#ff7a3d", "#f3c431"];
-  // Дар телефон танҳо 3 сурат — сабуктар медрояд.
-  const count = window.matchMedia("(max-width:760px)").matches ? 3 : 4;
-  holder.innerHTML = products.slice(0, count).map((product, index) => {
-    const image = productImage(product);
-    return `
-    <div class="welcome-bucket" style="--welcome-paint:${accents[index]};--welcome-delay:${0.35 + index * .18}s">
-      <img src="${escapeHTML(image)}" alt="" loading="${index ? "lazy" : "eager"}" decoding="async">
-      <img class="welcome-real-lid" src="${escapeHTML(image)}" alt="" loading="lazy" decoding="async">
-      <i class="welcome-pool"></i>
-      <i class="welcome-drop d1"></i>
-      <i class="welcome-drop d2"></i>
-      <i class="welcome-drop d3"></i>
-    </div>
-  `;
-  }).join("");
+  // Окнаи асосӣ нест шуд — дигар лозим нест.
 }
 
 function showProductDetails(id) {
@@ -1798,7 +1781,6 @@ function applyLanguage() {
   localStorage.setItem("ecoPaintLanguage", language);
   $("#search").placeholder = tr("search");
   $("#search").setAttribute("aria-label", tr("search"));
-  $("#homeLabel").textContent = tr("home");
   $("#catalogLabel").textContent = tr("catalog");
   $("#cartLabel").textContent = tr("cart");
   $("#contactLabel").textContent = tr("contact");
@@ -2020,28 +2002,15 @@ document.addEventListener("keydown", event => {
   $("#authOverlay").classList.add("hidden");
 });
 
-function restartWelcomeMotion() {
-  document.querySelectorAll(".welcome-copy span, .welcome-copy strong").forEach(node => {
-    node.style.animation = "none";
-    void node.offsetWidth;
-    node.style.animation = "";
-  });
-  renderWelcomeBuckets();
-}
-
 function showPage(page) {
-  $("#welcomePage").classList.toggle("hidden", page !== "home");
   $("#catalogPage").classList.toggle("hidden", page !== "catalog");
   $("#contact").classList.toggle("hidden", page !== "contact");
-  $("#homeBtn").classList.toggle("active", page === "home");
   $("#catalogBtn").classList.toggle("active", page === "catalog");
   $("#contactBtn").classList.toggle("active", page === "contact");
-  if (page === "home") restartWelcomeMotion();
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-$("#homeBtn").onclick = () => showPage("home");
-$("#catalogBtn").onclick = $("#welcomeCatalogBtn").onclick = () => showPage("catalog");
+$("#catalogBtn").onclick = () => showPage("catalog");
 $("#contactBtn").onclick = () => {
   if (!isRegistered()) {
     pendingAuthAction = () => showPage("contact");
@@ -2096,7 +2065,7 @@ window.addEventListener("storage", event => {
 
 async function startSite() {
   applyLanguage();
-  renderWelcomeBuckets();
+  showPage("catalog");
   pruneCart();
   updateBadge();
   loadProfile();

@@ -13,9 +13,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=16">
-  <link rel="stylesheet" href="language.css?v=16">
-  <link rel="stylesheet" href="features.css?v=16">
+  <link rel="stylesheet" href="style.css?v=17">
+  <link rel="stylesheet" href="language.css?v=17">
+  <link rel="stylesheet" href="features.css?v=17">
 </head>
 <body>
   <main class="app">
@@ -47,15 +47,7 @@
       </button>
     </header>
 
-    <section id="welcomePage" class="welcome-page">
-      <div class="welcome-copy" aria-label="Хуш омадед ба Eco Paint">
-        <span>Хуш</span><span>омадед</span><span>ба</span><strong>Eco Paint</strong>
-      </div>
-      <div id="welcomeBuckets" class="welcome-buckets" aria-hidden="true"></div>
-      <button id="welcomeCatalogBtn" class="welcome-catalog" type="button">Маҳсулотҳоро бинед <b>→</b></button>
-    </section>
-
-    <section id="catalogPage" class="catalog-page hidden">
+    <section id="catalogPage" class="catalog-page">
       <nav id="categories" class="chips"></nav>
       <div class="feature-bar">
         <button id="calculatorBtn"><b>⌗</b><span id="calculatorLabel"></span><i>→</i></button>
@@ -122,10 +114,7 @@
     </section>
 
     <nav class="bottom">
-      <button id="homeBtn" class="active">
-        ⌂<span id="homeLabel"></span>
-      </button>
-      <button id="catalogBtn">
+      <button id="catalogBtn" class="active">
         ▦<span id="catalogLabel"></span>
       </button>
       <button id="cartNav">
@@ -162,7 +151,7 @@
     </section>
   </div>
 
-  <script src="script.js?v=16" defer></script>
+  <script src="script.js?v=17" defer></script>
   <script defer>
     (function () {
       function load(src) {
