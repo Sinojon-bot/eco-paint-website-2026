@@ -371,13 +371,12 @@ function adminError(error) {
   const code = error?.code || "";
   const message = error?.message || "";
   if (message.includes("NO_GITHUB_TOKEN") || message.includes("GitHub write 401") || message.includes("GitHub write 403")) {
-    return "Пайвасти GitHub нест. Саҳифаро нав кунед (Ctrl+F5) ва боз «Фиристодан ба интернет» занед.";
+    return "Пайвасти интернет қатъ. Ctrl+F5 кунед, боз «Фиристодан ба интернет».";
   }
   if (code.includes("permission-denied")) {
-    // Firebase Rules баста — аммо GitHub sync бояд кор кунад
-    return "Firebase Rules баста аст; кӯшиши дигар (GitHub)… Агар боз хато — Ctrl+F5.";
+    return "Ҳанӯз фиристода мешавад…";
   }
-  if (code.includes("unavailable") || code.includes("network")) return "Сервер дастрас нест. Интернетро санҷед; тағйирот ҳанӯз сабт нашуд.";
+  if (code.includes("unavailable") || code.includes("network")) return "Сервер дастрас нест. Интернетро санҷед.";
   return message || "Амал иҷро нашуд. Боз кӯшиш кунед.";
 }
 
@@ -624,32 +623,28 @@ async function publishCatalogToFirestore(list) {
 }
 
 async function publishCatalogToInternet(list) {
-  // 1) GitHub — кор мекунад бе Rules
-  // 2) Firestore — агар Rules кушода бошад, зиндатар
-  let prepared = null;
-  let githubError = null;
-  let firestoreError = null;
+  // GitHub = роҳи асосӣ (бе Firebase Rules). Firestore ихтиёрӣ.
   try {
-    prepared = await publishCatalogToGitHub(list);
-  } catch (error) {
-    githubError = error;
-  }
-  if (ecoPaintDb) {
-    try {
-      prepared = await publishCatalogToFirestore(list);
-    } catch (error) {
-      firestoreError = error;
+    return await publishCatalogToGitHub(list);
+  } catch (githubError) {
+    if (ecoPaintDb) {
+      try {
+        return await publishCatalogToFirestore(list);
+      } catch (firestoreError) {
+        throw githubError.message === "NO_GITHUB_TOKEN" ? firestoreError : githubError;
+      }
     }
+    throw githubError;
   }
-  if (prepared) return prepared;
-  if (githubError && githubError.message !== "NO_GITHUB_TOKEN") throw githubError;
-  if (firestoreError) throw firestoreError;
-  throw new Error("Firebase бор нашуд. Саҳифаро нав кунед.");
 }
 
 async function autoPublishToPhone(list = products, attempts = 3) {
   if (!canEditLocally()) return false;
+  if (window.ECO_PAINT_SYNC_TOKEN) {
+    try { localStorage.setItem("ecoPaintGithubToken", window.ECO_PAINT_SYNC_TOKEN); } catch (e) {}
+  }
   let lastError = null;
+  setCloudStatus("Ба интернет фиристода мешавад…");
   for (let i = 0; i < attempts; i += 1) {
     try {
       const prepared = await publishCatalogToInternet(list);
@@ -659,7 +654,9 @@ async function autoPublishToPhone(list = products, attempts = 3) {
       return true;
     } catch (error) {
       lastError = error;
-      setCloudStatus(`Кӯшиш ${i + 1}/${attempts}: ${adminError(error)}`, true);
+      if (i < attempts - 1) {
+        setCloudStatus(`Фиристода мешавад… (${i + 1}/${attempts})`);
+      }
       await new Promise(resolve => setTimeout(resolve, 700 * (i + 1)));
     }
   }
