@@ -1,8 +1,12 @@
 ЭКО ПАЙНТ — MVP (нусхаи корӣ)
 
 СИЛКАҲОИ ИНТЕРНЕТ (Chrome):
-Сайт:  https://sinojon-bot.github.io/eco-paint-website-2026/
-Админ: https://sinojon-bot.github.io/eco-paint-website-2026/admin/
+Сайт:     https://sinojon-bot.github.io/eco-paint-website-2026/
+Телефон:  https://sinojon-bot.github.io/eco-paint-website-2026/phone.html
+Админ:    https://sinojon-bot.github.io/eco-paint-website-2026/admin/
+
+Агар телефон кӯҳнаро нишон диҳад — phone.html-ро кушо (кашро мешиканад).
+Компютер = телефон барои намуд. Барои маҳсулот: админ → Фиристодан ба интернет.
 
 MVP санҷида шуд:
 ✓ Каталог (6 маҳсулот), ҷустуҷӯ, категорияҳо
