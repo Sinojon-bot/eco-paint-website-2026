@@ -167,9 +167,9 @@ header {
   transition: transform .45s cubic-bezier(.2,.85,.2,1), box-shadow .45s ease;
 }
 .card:hover { transform: translateY(-10px) scale(1.015); box-shadow: 0 34px 70px #113d2430; }
-.photo { height: 310px; border-radius: 21px; background: linear-gradient(145deg,#f9fcfa,#e7f0ea); }
-.photo img { z-index: 2; position: relative; transform: scale(.94) rotate(-1deg); transition: transform .65s cubic-bezier(.2,.9,.2,1), filter .65s ease; }
-.card:hover .photo img { transform: translateY(-8px) scale(1.08) rotate(2deg); filter: drop-shadow(0 24px 18px #152e2040); }
+.photo { height: 310px; border-radius: 21px; background: #fff; box-shadow: inset 0 0 0 1px #e8eee9; }
+.photo img { z-index: 2; position: relative; transform: scale(.98); transition: transform .45s cubic-bezier(.2,.9,.2,1), filter .45s ease; filter: drop-shadow(0 10px 14px #17372022); }
+.card:hover .photo img { transform: translateY(-4px) scale(1.03); filter: drop-shadow(0 16px 18px #152e2030); }
 .photo span { z-index: 5; bottom: 14px; padding: 8px 14px; font-size: 11px; backdrop-filter: blur(10px); }
 
 .paint-motion { position: absolute; inset: 12px 12px auto; height: 314px; z-index: 5; overflow: hidden; border-radius: 23px; pointer-events: none; }
@@ -965,7 +965,10 @@ header {
 .product-hover-info strong { font-size:24px; }
 .product-hover-info p { max-width:95%; font-size:14px; font-weight:650; }
 .product-hover-info div span { background:#05160c42; border-color:#ffffff5c; backdrop-filter:blur(7px); }
-.card:hover .photo img { opacity:.12; transform:translateY(10px) scale(.82); }
+/* Сурати маҳсулот равшан мемонад — бе пинҳон шудан */
+.card:hover .photo img { opacity:1; transform:translateY(-4px) scale(1.03); }
+.paint-motion { display:none !important; }
+.product-hover-info { display:none !important; }
 
 @keyframes intro-open { to { transform:translate(90px,-100px) rotate(125deg) scale(.88); } }
 @keyframes intro-spray { 0% {opacity:0;transform:translate(0,0) scale(.3)} 35% {opacity:1} 100% {opacity:0;transform:translate(var(--x),var(--y)) scale(1.25)} }

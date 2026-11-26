@@ -1085,7 +1085,9 @@ function htmlText(value) {
 
 function productImage(product) {
   // Admin-uploaded images must show on the live site; only fall back if missing.
-  return product?.image || "images/interior.webp";
+  const image = product?.image || "images/interior.webp";
+  if (/^(data:|https?:|\/\/)/i.test(image) || image.includes("?")) return image;
+  return `${image}?v=28`;
 }
 
 const TRANSLATION_LANGUAGE = {

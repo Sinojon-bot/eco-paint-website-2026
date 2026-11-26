@@ -169,19 +169,20 @@ header {
 .photo {
   width:100%;
   height:275px;
-  padding:0;
+  padding:10px;
   position:relative;
   overflow:hidden;
   border:0;
   border-radius:15px;
-  background:linear-gradient(145deg,#fafcf9,#e8eee8)
+  background:#fff;
+  box-shadow:inset 0 0 0 1px #e7ede8
 }
 
 .photo img {
   width:100%;
   height:100%;
   object-fit:contain;
-  filter:drop-shadow(0 12px 10px #17372033)
+  filter:drop-shadow(0 10px 12px #17372028)
 }
 
 .photo span {
